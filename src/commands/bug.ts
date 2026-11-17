@@ -3,6 +3,7 @@ import * as path from 'path';
 import {
   ensureDir,
   formatDate,
+  getSporepoPaths,
   getUniqueBugFilePath,
   readTemplate,
   renderTemplate,
@@ -28,13 +29,18 @@ export function bugCommand(rawTitle: string, options: BugOptions = {}): BugResul
     throw new Error('[sporepo] Nama/judul bug tidak boleh kosong. Contoh: sporepo bug "Login 401 Unauthorized"');
   }
 
-  const targetDir = path.resolve(process.cwd(), options.targetDir || '.');
-  const bugsDir = path.join(targetDir, 'tests', 'bugs');
-  ensureDir(bugsDir);
+  const paths = getSporepoPaths(options.targetDir);
+  const { targetDir, bugsDir, legacyBugsDir } = paths;
+
+  let activeDir = bugsDir;
+  if (!fs.existsSync(bugsDir) && fs.existsSync(legacyBugsDir)) {
+    activeDir = legacyBugsDir;
+  }
+  ensureDir(activeDir);
 
   const dateStr = formatDate();
   const slug = slugify(title);
-  const filePath = getUniqueBugFilePath(bugsDir, dateStr, slug);
+  const filePath = getUniqueBugFilePath(activeDir, dateStr, slug);
 
   const templateContent = readTemplate('bug-report.md');
   const rendered = renderTemplate(templateContent, {

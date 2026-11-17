@@ -9,8 +9,8 @@ Sebagai AI Agent di lingkungan workstation ini, Anda **WAJIB MUTLAK** mematuhi 4
 
 ---
 
-## 1. Dilarang Menambah Fitur Kompleks Tanpa Meta-Prompt di `prompts/request/`
-- Setiap permintaan fitur baru atau perubahan arsitektural non-sepele harus memiliki dokumen spesifikasi di `prompts/request/XXX-nama-fitur.md` (buat via `npx sporepo req "Nama Fitur"`).
+## 1. Dilarang Menambah Fitur Kompleks Tanpa Meta-Prompt di `docs/sporepo/reqs/`
+- Setiap permintaan fitur baru atau perubahan arsitektural non-sepele harus memiliki dokumen spesifikasi di `docs/sporepo/reqs/XXX-nama-fitur.md` (buat via `npx sporepo req "Nama Fitur"`).
 - Dokumen harus memuat pembagian tanggung jawab persona (@Backend, @Frontend, @QA, dll) serta batas kepemilikan file yang tegas.
 
 ---
@@ -23,7 +23,7 @@ Sebagai AI Agent di lingkungan workstation ini, Anda **WAJIB MUTLAK** mematuhi 4
 ---
 
 ## 3. The Iron Law: Investigasi Akar Masalah & TDD Sebelum Memperbaiki Bug
-- Setiap perbaikan bug harus didasarkan pada dokumen bukti riil di `tests/bugs/YYYY-MM-DD-nama-bug.md` (buat via `npx sporepo bug "Nama Bug"`), lengkap dengan perintah cURL riil dan payload error.
+- Setiap perbaikan bug harus didasarkan pada dokumen bukti riil di `docs/sporepo/bugs/YYYY-MM-DD-nama-bug.md` (buat via `npx sporepo bug "Nama Bug"`), lengkap dengan perintah cURL riil dan payload error.
 - **"NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST"**: Dilarang melakukan perbaikan tebak-tebakan (*symptom patching*).
 - **Mandat TDD:** Agen WAJIB menulis skenario automated test yang sengaja **GAGAL** terlebih dahulu untuk membuktikan bug sebelum menulis kode perbaikan. Kode baru boleh diubah hanya setelah test gagal tersebut tercipta (*Red-Green-Refactor*).
 
@@ -32,3 +32,4 @@ Sebagai AI Agent di lingkungan workstation ini, Anda **WAJIB MUTLAK** mematuhi 4
 ## 4. Larangan Mengklaim Selesai Tanpa Bukti Log Terminal (*Terminal-Proven Verification*)
 - Dilarang membuat pernyataan keberhasilan ("sudah selesai", "sudah lulus", "semua berjalan normal") tanpa menjalankan perintah pengujian di terminal (`npm test` atau test runner resmi).
 - Bukti output log terminal dengan exit code 0 harus dilampirkan secara transparan sebelum menutup sesi atau tugas.
+- Berkas yang telah `VERIFIED` dapat diarsipkan dengan `npx sporepo archive <id>` atau `npx sporepo archive --all-verified`.

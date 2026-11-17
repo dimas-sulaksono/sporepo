@@ -9,14 +9,14 @@ Repositori ini menerapkan framework **sporepo**. Seluruh AI Agent yang bekerja d
 
 ---
 
-## 1. Alur Fitur Baru: Meta-Prompt & Reviewer Gatekeeper ⛔
-- **DILARANG** mengimplementasikan fitur non-sepele tanpa dokumen spesifikasi di `prompts/request/XXX-nama-fitur.md`.
+## 1. Alur Fitur Baru: Meta-Prompt di `docs/sporepo/reqs/` & Reviewer Gatekeeper ⛔
+- **DILARANG** mengimplementasikan fitur non-sepele tanpa dokumen spesifikasi di `docs/sporepo/reqs/XXX-nama-fitur.md`.
 - **MANDAT STOP (Reviewer Gatekeeper Barrier):** Sebelum menulis kode apa pun, agen WAJIB mengaudit celah logika, dependensi, dan edge cases pada spesifikasi. Ajukan pertanyaan keputusan kepada pengguna jika ada ambiguitas, dan **TUNGGU persetujuan pengguna** (`APPROVED`) sebelum mulai implementasi.
 
 ---
 
-## 2. Alur Perbaikan Bug: Ground-Truth Evidence di `tests/bugs/`
-- Setiap investigasi bug **WAJIB** memiliki dokumen bukti riil di `tests/bugs/YYYY-MM-DD-nama-bug.md`.
+## 2. Alur Perbaikan Bug: Ground-Truth Evidence di `docs/sporepo/bugs/`
+- Setiap investigasi bug **WAJIB** memiliki dokumen bukti riil di `docs/sporepo/bugs/YYYY-MM-DD-nama-bug.md`.
 - Dokumen harus memuat bukti cURL nyata (*ground-truth*), kode error aktual, dan perilaku yang diharapkan.
 
 ---
@@ -29,6 +29,7 @@ Repositori ini menerapkan framework **sporepo**. Seluruh AI Agent yang bekerja d
 
 ---
 
-## 4. Bukti Konkret Terminal (*Verification Before Completion*)
-- **DILARANG** mengklaim bahwa tugas telah "selesai", "lulus", atau "bekerja dengan baik" tanpa menjalankan perintah pengujian di terminal (`npm test` atau runner terkait).
+## 4. Bukti Konkret Terminal & Pengarsipan (*Terminal-Proven Verification & Archive*)
+- **DILARANG** mengklaim bahwa tugas telah "selesai" tanpa menjalankan perintah pengujian di terminal (`npm test` atau runner terkait).
 - Bukti log terminal nyata dengan exit code 0 harus dilampirkan sebelum menutup task.
+- Berkas yang telah `VERIFIED` dapat dipindahkan ke arsip menggunakan `npx sporepo archive <id>` atau `npx sporepo archive --all-verified`.

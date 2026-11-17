@@ -4,6 +4,7 @@ import {
   ensureDir,
   formatDate,
   getNextRequestNumber,
+  getSporepoPaths,
   readTemplate,
   renderTemplate,
   slugify,
@@ -28,14 +29,20 @@ export function reqCommand(rawTitle: string, options: ReqOptions = {}): ReqResul
     throw new Error('[sporepo] Nama/judul fitur tidak boleh kosong. Contoh: sporepo req "Autentikasi JWT"');
   }
 
-  const targetDir = path.resolve(process.cwd(), options.targetDir || '.');
-  const requestsDir = path.join(targetDir, 'prompts', 'request');
-  ensureDir(requestsDir);
+  const paths = getSporepoPaths(options.targetDir);
+  const { targetDir, reqsDir, archiveReqsDir, legacyPromptsDir } = paths;
 
-  const { formatted: id } = getNextRequestNumber(requestsDir);
+  // Decide active target directory: prefer docs/sporepo/reqs, fallback to legacy if exists and docs doesn't
+  let activeDir = reqsDir;
+  if (!fs.existsSync(reqsDir) && fs.existsSync(legacyPromptsDir)) {
+    activeDir = legacyPromptsDir;
+  }
+  ensureDir(activeDir);
+
+  const { formatted: id } = getNextRequestNumber(activeDir, [archiveReqsDir, legacyPromptsDir]);
   const slug = slugify(title);
   const fileName = `${id}-${slug}.md`;
-  const filePath = path.join(requestsDir, fileName);
+  const filePath = path.join(activeDir, fileName);
 
   const templateContent = readTemplate('meta-prompt.md');
   const dateStr = formatDate();

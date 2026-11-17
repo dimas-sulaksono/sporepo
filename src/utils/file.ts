@@ -1,6 +1,41 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+export interface SporepoPaths {
+  targetDir: string;
+  baseDir: string;
+  reqsDir: string;
+  bugsDir: string;
+  archiveDir: string;
+  archiveReqsDir: string;
+  archiveBugsDir: string;
+  legacyPromptsDir: string;
+  legacyBugsDir: string;
+  rulePath: string;
+}
+
+/**
+ * Returns the standardized paths for sporepo directories in a target repository.
+ */
+export function getSporepoPaths(targetDir: string = process.cwd()): SporepoPaths {
+  const resolvedTarget = path.resolve(process.cwd(), targetDir);
+  const baseDir = path.join(resolvedTarget, 'docs', 'sporepo');
+  const archiveDir = path.join(baseDir, 'archive');
+
+  return {
+    targetDir: resolvedTarget,
+    baseDir,
+    reqsDir: path.join(baseDir, 'reqs'),
+    bugsDir: path.join(baseDir, 'bugs'),
+    archiveDir,
+    archiveReqsDir: path.join(archiveDir, 'reqs'),
+    archiveBugsDir: path.join(archiveDir, 'bugs'),
+    legacyPromptsDir: path.join(resolvedTarget, 'prompts', 'request'),
+    legacyBugsDir: path.join(resolvedTarget, 'tests', 'bugs'),
+    rulePath: path.join(resolvedTarget, '.sporepo', 'rule.md'),
+  };
+}
+
 /**
  * Normalizes any title string into a URL-friendly, filesystem-safe kebab-case slug.
  */
@@ -42,23 +77,22 @@ export function fileExists(filePath: string): boolean {
 }
 
 /**
- * Scans a directory for request markdown files (e.g. 001-*.md) and calculates the next sequence number.
- * Defaults to 001 if no matching files are found.
+ * Scans directories for request markdown files (e.g. 001-*.md) and calculates the next sequence number.
+ * Scans both active and archived request directories so numbers never reset.
  */
-export function getNextRequestNumber(dirPath: string): { num: number; formatted: string } {
-  if (!fs.existsSync(dirPath)) {
-    return { num: 1, formatted: '001' };
-  }
-
-  const files = fs.readdirSync(dirPath);
+export function getNextRequestNumber(dirPath: string, extraDirs: string[] = []): { num: number; formatted: string } {
+  const dirsToScan = [dirPath, ...extraDirs].filter((d) => d && fs.existsSync(d));
   let maxNum = 0;
 
-  for (const file of files) {
-    const match = file.match(/^(\d{1,})-.*\.md$/i);
-    if (match) {
-      const parsed = parseInt(match[1], 10);
-      if (!isNaN(parsed) && parsed > maxNum) {
-        maxNum = parsed;
+  for (const d of dirsToScan) {
+    const files = fs.readdirSync(d);
+    for (const file of files) {
+      const match = file.match(/^(\d{1,})-.*\.md$/i);
+      if (match) {
+        const parsed = parseInt(match[1], 10);
+        if (!isNaN(parsed) && parsed > maxNum) {
+          maxNum = parsed;
+        }
       }
     }
   }

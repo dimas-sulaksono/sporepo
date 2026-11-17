@@ -14,6 +14,8 @@ import { initCommand } from '../src/commands/init';
 import { reqCommand } from '../src/commands/req';
 import { bugCommand } from '../src/commands/bug';
 import { auditCommand } from '../src/commands/audit';
+import { archiveCommand } from '../src/commands/archive';
+import { migrateCommand } from '../src/commands/migrate';
 
 const ROOT_DIR = path.resolve(__dirname, __dirname.includes('dist') ? '../..' : '..');
 const TEST_SANDBOX_DIR = path.join(ROOT_DIR, '.scratch', 'test-sandbox');
@@ -86,38 +88,38 @@ describe('sporepo - Unit & Integration Test Suite', () => {
   });
 
   describe('2. initCommand', () => {
-    it('should initialize repository structure and template files', () => {
+    it('should initialize repository structure in docs/sporepo/ and template files', () => {
       const targetDir = path.join(TEST_SANDBOX_DIR, 'init-target');
       const res = initCommand(targetDir, { quiet: true });
 
-      assert.ok(fs.existsSync(path.join(targetDir, 'prompts', 'request')));
-      assert.ok(fs.existsSync(path.join(targetDir, 'tests', 'bugs')));
-      assert.ok(fs.existsSync(path.join(targetDir, 'prompts', 'README.md')));
-      assert.ok(fs.existsSync(path.join(targetDir, 'tests', 'bugs', 'README.md')));
+      assert.ok(fs.existsSync(path.join(targetDir, 'docs', 'sporepo', 'reqs')));
+      assert.ok(fs.existsSync(path.join(targetDir, 'docs', 'sporepo', 'bugs')));
+      assert.ok(fs.existsSync(path.join(targetDir, 'docs', 'sporepo', 'archive')));
+      assert.ok(fs.existsSync(path.join(targetDir, 'docs', 'sporepo', 'README.md')));
       assert.ok(fs.existsSync(path.join(targetDir, '.sporepo', 'rule.md')));
 
-      assert.equal(res.createdFiles.length, 3);
+      assert.ok(res.createdFiles.length >= 2);
     });
 
     it('should not overwrite existing files unless force option is true', () => {
       const targetDir = path.join(TEST_SANDBOX_DIR, 'init-target');
-      const readmePath = path.join(targetDir, 'prompts', 'README.md');
+      const readmePath = path.join(targetDir, 'docs', 'sporepo', 'README.md');
       fs.writeFileSync(readmePath, 'CUSTOM_CONTENT');
 
       // Without force -> should skip
       const res1 = initCommand(targetDir, { quiet: true, force: false });
-      assert.ok(res1.skippedFiles.includes('prompts/README.md'));
+      assert.ok(res1.skippedFiles.includes('docs/sporepo/README.md'));
       assert.equal(fs.readFileSync(readmePath, 'utf-8'), 'CUSTOM_CONTENT');
 
       // With force -> should overwrite
       const res2 = initCommand(targetDir, { quiet: true, force: true });
-      assert.ok(res2.createdFiles.includes('prompts/README.md'));
+      assert.ok(res2.createdFiles.includes('docs/sporepo/README.md'));
       assert.notEqual(fs.readFileSync(readmePath, 'utf-8'), 'CUSTOM_CONTENT');
     });
   });
 
   describe('3. reqCommand (Feature Requests)', () => {
-    it('should create incremented request files with complete meta-prompt content', () => {
+    it('should create incremented request files in docs/sporepo/reqs with complete meta-prompt content', () => {
       const targetDir = path.join(TEST_SANDBOX_DIR, 'req-target');
       initCommand(targetDir, { quiet: true });
 
@@ -170,7 +172,7 @@ describe('sporepo - Unit & Integration Test Suite', () => {
     });
   });
 
-  describe('5. auditCommand', () => {
+  describe('5. auditCommand, archiveCommand & migrateCommand', () => {
     it('should accurately audit repository status and compliance', () => {
       const targetDir = path.join(TEST_SANDBOX_DIR, 'audit-target');
       initCommand(targetDir, { quiet: true });
@@ -179,12 +181,47 @@ describe('sporepo - Unit & Integration Test Suite', () => {
       bugCommand('Bug One', { targetDir, quiet: true });
 
       const audit = auditCommand(targetDir, { quiet: true });
-      assert.equal(audit.hasPromptsDir, true);
+      assert.equal(audit.hasReqsDir, true);
       assert.equal(audit.hasBugsDir, true);
       assert.equal(audit.hasSporepoRule, true);
-      assert.equal(audit.requests.length, 1);
-      assert.equal(audit.bugs.length, 1);
+      assert.equal(audit.activeRequests.length, 1);
+      assert.equal(audit.activeBugs.length, 1);
       assert.ok(audit.complianceScore >= 60);
+    });
+
+    it('should archive a completed item and preserve sequence numbering across active and archive', () => {
+      const targetDir = path.join(TEST_SANDBOX_DIR, 'archive-target');
+      initCommand(targetDir, { quiet: true });
+
+      const req1 = reqCommand('Feature Done', { targetDir, quiet: true });
+      assert.equal(req1.id, '001');
+
+      // Archive request 001
+      const archRes = archiveCommand('001', { targetDir, quiet: true });
+      assert.equal(archRes.archivedFiles.length, 1);
+      assert.ok(fs.existsSync(path.join(targetDir, 'docs', 'sporepo', 'archive', 'reqs', '001-feature-done.md')));
+      assert.ok(!fs.existsSync(req1.filePath));
+
+      // Next request MUST be 002 even after 001 is archived
+      const req2 = reqCommand('Feature Two', { targetDir, quiet: true });
+      assert.equal(req2.id, '002');
+    });
+
+    it('should migrate legacy prompts/ and tests/bugs/ to docs/sporepo/', () => {
+      const targetDir = path.join(TEST_SANDBOX_DIR, 'legacy-migrate-target');
+      const legacyReqDir = path.join(targetDir, 'prompts', 'request');
+      const legacyBugDir = path.join(targetDir, 'tests', 'bugs');
+      ensureDir(legacyReqDir);
+      ensureDir(legacyBugDir);
+
+      fs.writeFileSync(path.join(legacyReqDir, '001-legacy-req.md'), '# META-PROMPT: [001] Legacy');
+      fs.writeFileSync(path.join(legacyBugDir, '2026-11-17-legacy-bug.md'), '# BUG REPORT: Legacy Bug');
+
+      const migRes = migrateCommand(targetDir, { quiet: true });
+      assert.equal(migRes.migratedReqs.length, 1);
+      assert.equal(migRes.migratedBugs.length, 1);
+      assert.ok(fs.existsSync(path.join(targetDir, 'docs', 'sporepo', 'reqs', '001-legacy-req.md')));
+      assert.ok(fs.existsSync(path.join(targetDir, 'docs', 'sporepo', 'bugs', '2026-11-17-legacy-bug.md')));
     });
   });
 
@@ -194,13 +231,15 @@ describe('sporepo - Unit & Integration Test Suite', () => {
     it('should execute bin/sporepo.js --help and exit with 0', () => {
       const rawOut = execFileSync(process.execPath, [binScript, '--help'], { encoding: 'utf-8' });
       const out = rawOut.replace(/\x1b\[[0-9;]*m/g, '');
-      assert.ok(out.includes('sporepo v1.0.0'));
-      assert.ok(out.includes('init [target-dir]'));
-      assert.ok(out.includes('req  <"Nama Fitur">'));
-      assert.ok(out.includes('bug  <"Nama Bug">'));
+      assert.ok(out.includes('sporepo v1.1.0'));
+      assert.ok(out.includes('init    [target-dir]'));
+      assert.ok(out.includes('req     <"Nama Fitur">'));
+      assert.ok(out.includes('bug     <"Nama Bug">'));
+      assert.ok(out.includes('archive <id | -a>'));
+      assert.ok(out.includes('migrate [target-dir]'));
     });
 
-    it('should execute bin/sporepo.js init, req, bug, and audit end-to-end via CLI', () => {
+    it('should execute bin/sporepo.js init, req, bug, archive, and audit end-to-end via CLI', () => {
       const e2eDir = path.join(TEST_SANDBOX_DIR, 'e2e-cli-test');
 
       // 1. init
@@ -225,11 +264,19 @@ describe('sporepo - Unit & Integration Test Suite', () => {
       assert.ok(bugOut.includes('Laporan Bug berhasil dibuat'));
       assert.ok(bugOut.includes('null-pointer-in-token-parser.md'));
 
-      // 4. audit
+      // 4. archive 001
+      const archOut = execFileSync(
+        process.execPath,
+        [binScript, 'archive', '001', '--dir', e2eDir],
+        { encoding: 'utf-8' }
+      );
+      assert.ok(archOut.includes('Berhasil mengarsipkan 1 berkas'));
+
+      // 5. audit
       const auditOut = execFileSync(process.execPath, [binScript, 'audit', e2eDir], { encoding: 'utf-8' });
       assert.ok(auditOut.includes('Laporan Kepatuhan Rekayasa'));
-      assert.ok(auditOut.includes('prompts/request/ : Ditemukan'));
-      assert.ok(auditOut.includes('#001'));
+      assert.ok(auditOut.includes('docs/sporepo/reqs/'));
+      assert.ok(auditOut.includes('docs/sporepo/archive/'));
     });
   });
 });

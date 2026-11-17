@@ -116,7 +116,7 @@ describe('SPOREPO - Advanced QA & Security Edge-Cases', () => {
       // Traversal target pointing to level1 from level2
       const res = initCommand(path.join(nestedDir, '..'), { quiet: true });
       assert.equal(res.targetDir, path.join(SANDBOX_DIR, 'level1'));
-      assert.ok(fs.existsSync(path.join(SANDBOX_DIR, 'level1', 'prompts', 'request')));
+      assert.ok(fs.existsSync(path.join(SANDBOX_DIR, 'level1', 'docs', 'sporepo', 'reqs')));
     });
 
     it('should verify binary file permissions have executable flag 0755', () => {
@@ -153,11 +153,11 @@ describe('SPOREPO - Advanced QA & Security Edge-Cases', () => {
       // Missing command -> prints help, exit 0
       const rawHelp = execFileSync(process.execPath, [binScript], { encoding: 'utf-8' });
       const cleanHelp = rawHelp.replace(/\x1b\[[0-9;]*m/g, '');
-      assert.ok(cleanHelp.includes('sporepo v1.0.0'));
+      assert.ok(cleanHelp.includes('sporepo v1.1.0'));
 
       // Version flag -> exit 0
       const verOut = execFileSync(process.execPath, [binScript, '-v'], { encoding: 'utf-8' });
-      assert.equal(verOut.trim(), 'sporepo v1.0.0');
+      assert.equal(verOut.trim(), 'sporepo v1.1.0');
 
       // Invalid command -> exit 1
       assert.throws(() => {

@@ -12,3 +12,6 @@ dist/
 # Test outputs
 coverage/
 tmp/
+
+# Meta
+docs/prompt
