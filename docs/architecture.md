@@ -38,18 +38,21 @@ Proyek ini dibangun menggunakan TypeScript dengan target runtime Node.js >= 18.0
                         ▼
                  [src/cli.ts]
       (Argument Parser & Subcommand Router)
-       ┌───────────┬───────────┬───────────┐
-       ▼           ▼           ▼           ▼
-  [init.ts]    [req.ts]    [bug.ts]    [audit.ts]
-       │           │           │           │
-       └───────────┴─────┬─────┴───────────┘
+       ┌───────────┬───────────┬───────────┬───────────┬───────────┬───────────┐
+       ▼           ▼           ▼           ▼           ▼           ▼           ▼
+  [init.ts]   [req.ts]    [bug.ts]   [archive.ts] [migrate.ts]  [sdd.ts]  [gatekeeper.ts]
+       │           │           │           │           │           │           │
+       │           │           │           │           │           ▼           │
+       │           │           │           │           │     [sdd-parser.ts]   │
+       │           │           │           │           │           │           │
+       └───────────┴─────┬─────┴───────────┴───────────┴───────────┴───────────┘
                          ▼
                  [src/utils/file.ts]
   (Template Engine, Path Resolver, Slugifier, Safe I/O)
                          │
                          ▼
-                [templates/*.md]
-  (Meta-Prompt, Bug Report, Local Rule, README guides)
+                [templates/**/*.md]
+  (Meta-Prompt, Bug Report, SDD Prompts, Gatekeeper Prompts, Local Rule, Guides)
 ```
 
 ### C. Deskripsi Tanggung Jawab Modul
@@ -57,11 +60,15 @@ Proyek ini dibangun menggunakan TypeScript dengan target runtime Node.js >= 18.0
 | Modul | Path | Tanggung Jawab Utama |
 | :--- | :--- | :--- |
 | **Executable Entrypoint** | `bin/sporepo.js` | Entrypoint CLI berizin eksekusi (`chmod +x`), mendeteksi runtime `dist/src/cli.js` atau `dist/cli.js`, dan meneruskan `process.argv`. |
-| **Command Router** | `src/cli.ts` | Parsing argumen CLI murni tanpa library pihak ketiga, menangani flag `--help`, `--version`, `--dir`, `--force`, dan routing ke handler perintah. |
-| **Init Handler** | `src/commands/init.ts` | Menginisiasi fondasi folder `prompts/request/`, `tests/bugs/`, menyematkan `.sporepo/rule.md`, serta README panduan. |
-| **Request Handler** | `src/commands/req.ts` | Menghitung nomor urut tertinggi, memformat sequence 3-digit (`001`, `002`), men-slugify judul, dan merender template meta-prompt. |
-| **Bug Handler** | `src/commands/bug.ts` | Menentukan tanggal ISO `YYYY-MM-DD`, mencegah tabrakan nama file dengan counter otomatis (`-2.md`), dan merender template laporan bug. |
-| **Audit Handler** | `src/commands/audit.ts` | Mengaudit repositori target: memeriksa kelengkapan folder, status review gatekeeper fitur, kelengkapan cURL pada bug, dan menghitung skor kepatuhan (0 - 100). |
+| **Command Router** | `src/cli.ts` | Parsing argumen CLI murni tanpa library pihak ketiga, menangani flag `--help`, `--version`, `--dir`, `--force`, dan routing ke seluruh handler perintah. |
+| **Init Handler** | `src/commands/init.ts` | Menginisiasi fondasi folder `docs/sporepo/reqs/`, `docs/sporepo/bugs/`, `docs/sporepo/archive/`, menyematkan `.sporepo/rule.md`, serta README panduan. |
+| **Request Handler** | `src/commands/req.ts` | Menghitung nomor urut tertinggi, memformat sequence 3-digit (`001`, `002`), men-slugify judul, dan merender template meta-prompt di `docs/sporepo/reqs/`. |
+| **Bug Handler** | `src/commands/bug.ts` | Menentukan tanggal ISO `YYYY-MM-DD`, mencegah tabrakan nama file dengan counter otomatis (`-2.md`), dan merender template laporan bug di `docs/sporepo/bugs/`. |
+| **Archive Handler** | `src/commands/archive.ts` | Memindahkan dokumen fitur berstatus `VERIFIED` atau bug berstatus `CLOSED/VERIFIED` ke `docs/sporepo/archive/`, menjaga agar penomoran urut scanner tetap konsisten. |
+| **Migrate Handler** | `src/commands/migrate.ts` | Memindahkan struktur repositori legacy (`prompts/request/` dan `tests/bugs/`) ke struktur terpusat `docs/sporepo/` secara deterministik dan aman. |
+| **SDD Engine** | `src/commands/sdd.ts` | Engine orkestrasi Subagent-Driven Development: parsing task, inisiasi ledger status per-commit, ekstraksi brief isolasi per subtugas, dan perakitan review package. |
+| **Gatekeeper Linter** | `src/commands/gatekeeper.ts` | Linter audit celah spesifikasi adversial: validasi kelengkapan struktural, deteksi anti-pattern, audit Reviewer Gatekeeper sign-off, kalkulasi maturity score (0-100), dan auto-discovery. |
+| **SDD Parser Utility** | `src/utils/sdd-parser.ts` | Parser metadata Meta-Prompt, ekstraksi seksi Touch Boundaries, parsing daftar tugas atomik berformat markdown, dan generator isolated task brief. |
 | **File Utilities** | `src/utils/file.ts` | Helper murni untuk sanitasi slug, auto-increment numbering, penanganan template, traversal direktori aman, dan resolusi path multi-lingkungan. |
 
 ---
