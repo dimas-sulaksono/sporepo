@@ -12,6 +12,7 @@ Selamat datang di direktori dokumentasi teknis resmi proyek **sporepo**. Direkto
 | **[cli-reference.md](cli-reference.md)** | Spesifikasi lengkap antarmuka baris perintah (`init`, `req`, `bug`, `sdd`, `audit`), argumen, opsi, dan exit code. |
 | **[sdd-orchestration.md](sdd-orchestration.md)** | Panduan orkestrasi Subagent-Driven Development (SDD), Conductor protocol, brief extraction, dan review pack. |
 | **[packaging-and-release.md](packaging-and-release.md)** | Panduan pengemasan paket NPM, matriks CI GitHub Actions, verifikasi tarball, dan prosedur tagging rilis. |
+| **[release-readiness-certificate.md](release-readiness-certificate.md)** | Sertifikat kesiapan rilis produksi, audit keamanan rahasia (zero-leakage), dan pengesahan gatekeeper. |
 
 ---
 

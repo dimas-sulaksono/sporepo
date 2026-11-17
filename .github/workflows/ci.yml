@@ -1,4 +1,4 @@
-name: CI Matrix
+name: CI Matrix & Security
 
 on:
   push:
@@ -7,6 +7,20 @@ on:
     branches: [ main ]
 
 jobs:
+  gitleaks:
+    name: Automated Secret Scan (Gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository with Full History
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks Detection
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   test:
     name: Node.js ${{ matrix.node-version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
