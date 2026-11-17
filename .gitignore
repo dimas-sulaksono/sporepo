@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Build artifacts
+dist/
+
+# Scratch & Temporary
+.scratch/
+*.log
+.DS_Store
+
+# Test outputs
+coverage/
+tmp/

@@ -1,0 +1,41 @@
+{
+  "name": "sporepo",
+  "version": "1.0.0",
+  "description": "Zero-dependency CLI & engineering framework for AI-assisted software development (Meta-Prompting + Superpowers Discipline)",
+  "main": "dist/src/cli.js",
+  "bin": {
+    "sporepo": "./bin/sporepo.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "test": "tsc && node --test dist/tests/**/*.test.js",
+    "test:direct": "node --test tests/**/*.test.ts",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "keywords": [
+    "ai",
+    "meta-prompt",
+    "prompt-engineering",
+    "superpowers",
+    "tdd",
+    "systematic-debugging",
+    "software-engineering",
+    "developer-tools",
+    "cli",
+    "antigravity"
+  ],
+  "author": "Sulaksono",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sulaksono/sporepo.git"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "typescript": "^5.7.2"
+  }
+}
