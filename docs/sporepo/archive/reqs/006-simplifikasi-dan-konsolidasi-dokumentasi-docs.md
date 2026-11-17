@@ -3,6 +3,7 @@
 > **Request ID:** 006  
 > **Date:** 2026-11-17  
 > **Status:** `VERIFIED` <!-- Options: DRAFT | REVIEW_PENDING | APPROVED | IN_PROGRESS | VERIFIED -->  
+> **Archived At:** 2026-11-17
 > **Branch / Target:** `main`  
 > **Target Scope:** Seluruh Berkas Dokumentasi `docs/*.md` dan `README.md`  
 > **Tingkat Kritis:** `MEDIUM (Developer Experience & Documentation Lean Quality)`  
