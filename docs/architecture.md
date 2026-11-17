@@ -1,6 +1,6 @@
 # Arsitektur Teknis sporepo
 
-Spesifikasi desain arsitektur internal, struktur modul, dan sistem template **sporepo v1.1.0**.
+Spesifikasi desain arsitektur internal, struktur modul, dan sistem template **sporepo v1.1.1**.
 
 ---
 
@@ -45,7 +45,7 @@ flowchart TD
 | Modul | Path | Tanggung Jawab |
 | :--- | :--- | :--- |
 | **Entrypoint** | `bin/sporepo.js` | Executable wrapper (`chmod 0755`), mendeteksi runtime `dist/src/cli.js`, meneruskan argumen. |
-| **Command Router** | `src/cli.ts` | Parsing argumen CLI zero-dependency, penanganan `--help`, `--version`, dan routing perintah. |
+| **Command Router** | `src/cli.ts` | Parsing argumen CLI zero-dependency, resolusi dinamis versi package.json, penanganan `--help`, `--version`, dan routing perintah. |
 | **Init** | `src/commands/init.ts` | Perancah `docs/sporepo/{reqs,bugs,archive}`, `.sporepo/rule.md`, dan panduan markdown. |
 | **Request** | `src/commands/req.ts` | Kalkulasi nomor urut 3-digit auto-increment, slugify judul, render template meta-prompt. |
 | **Bug** | `src/commands/bug.ts` | Format tanggal ISO `YYYY-MM-DD`, resolusi tabrakan nama (`-2.md`), render template bug report. |

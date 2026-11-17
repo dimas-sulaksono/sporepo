@@ -1,7 +1,7 @@
 # Sertifikat Kesiapan Rilis Produksi & Audit Keamanan
 
 > **Proyek:** `sporepo`  
-> **Versi Target:** `v1.1.0`  
+> **Versi Target:** `v1.1.1`  
 > **Lingkungan Rilis:** Public Open-Source (`GitHub` & `NPM Registry`)  
 > **Tanggal Audit:** 2026-11-17  
 > **Hasil Audit:** **100% LULUS (PRODUCTION READY & ZERO LEAKAGE CERTIFIED)**  
@@ -69,4 +69,4 @@ Audit keamanan, sanitasi rahasia, integritas packaging, dan kebersihan riwayat G
 
 ## 4. Kesimpulan Akhir
 
-Repositori `sporepo v1.1.0` dinyatakan **resmi layak dan aman untuk dirilis ke publik** (*Production-Ready*).
+Repositori `sporepo v1.1.1` dinyatakan **resmi layak dan aman untuk dirilis ke publik** (*Production-Ready*).

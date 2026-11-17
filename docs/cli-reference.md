@@ -1,6 +1,6 @@
 # Referensi CLI sporepo
 
-Panduan lengkap antarmuka baris perintah (**Command Line Interface / CLI**) **sporepo v1.1.0**.
+Panduan lengkap antarmuka baris perintah (**Command Line Interface / CLI**) **sporepo v1.1.1**.
 
 ---
 

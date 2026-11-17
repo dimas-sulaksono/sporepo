@@ -1,6 +1,6 @@
 # Panduan Packaging, CI, & Rilis sporepo
 
-Spesifikasi pengemasan paket NPM, Continuous Integration (CI), dan prosedur rilis **sporepo v1.1.0**.
+Spesifikasi pengemasan paket NPM, Continuous Integration (CI), dan prosedur rilis **sporepo v1.1.1**.
 
 ---
 
@@ -55,7 +55,7 @@ npm test
 npm pack --dry-run
 
 # 4. Buat Git tag rilis teranotasi
-git tag -a v1.1.0 -m "Release sporepo v1.1.0"
+git tag -a v1.1.1 -m "Release sporepo v1.1.1"
 git push origin main --tags
 
 # 5. Publikasikan ke NPM Registry (hanya maintainer)
