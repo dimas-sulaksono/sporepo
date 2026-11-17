@@ -23,7 +23,8 @@ All active specifications, bug investigations, and historical archives are clean
 3. **Reviewer Gatekeeper Barrier:** AI agents are strictly instructed to pause and audit specifications for ambiguities, breaking changes, and edge cases before writing implementation code.
 4. **Lifecycle Archiving (`archive/`):** Completed tasks (`VERIFIED`) can be cleanly archived (`npx sporepo archive`) while maintaining continuous 3-digit auto-increment sequence numbers.
 5. **The Iron Law of Debugging:** Prohibits symptom patching and speculation. Enforces root-cause discovery, deterministic cURL reproduction, and Test-Driven Development (TDD) failing tests before code fixes.
-6. **Terminal-Proven Verification:** Mandates automated test execution and log verification before closing tasks.
+6. **Subagent-Driven Development (SDD):** Orchestrates tasks atomically with fresh implementer and reviewer subagents per task to eliminate context pollution and amnesia.
+7. **Terminal-Proven Verification:** Mandates automated test execution and log verification before closing tasks.
 
 ---
 
@@ -147,6 +148,7 @@ npx sporepo audit
 | `sporepo bug` | `<"Title"> [-d dir]` | Generates timestamped bug report in `docs/sporepo/bugs/`. |
 | `sporepo archive` | `<id \| -a> [-d dir]` | Moves verified items to `docs/sporepo/archive/`. |
 | `sporepo migrate` | `[target-dir]` | Safely migrates legacy `prompts/` and `tests/bugs/` to `docs/sporepo/`. |
+| `sporepo sdd` | `<init \| brief \| pack \| parse>` | Orchestrates Subagent-Driven Development with zero context pollution. |
 | `sporepo audit` | `[target-dir]` | Evaluates repository sporepo compliance score, items, and pending archives. |
 
 ---
@@ -155,7 +157,9 @@ npx sporepo audit
 
 For workstation-wide enforcement in Google Antigravity or Gemini workspaces:
 
-- **Global Skill:** Copy `skills/sporepo/SKILL.md` to `~/.gemini/config/skills/sporepo/SKILL.md`.
+- **Global Skills:**
+  - Copy `skills/sporepo/SKILL.md` to `~/.gemini/config/skills/sporepo/SKILL.md`.
+  - Copy `skills/sporepo-sdd/SKILL.md` to `~/.gemini/config/skills/sporepo-sdd/SKILL.md`.
 - **Global Rule:** Copy `rules/base-sporepo.md` to `~/.gemini/config/rules/base-sporepo.md`.
 
 ---
@@ -169,7 +173,7 @@ npm install
 # Compile TypeScript
 npm run build
 
-# Run native test suite (25 tests)
+# Run native test suite (35 tests)
 npm test
 ```
 

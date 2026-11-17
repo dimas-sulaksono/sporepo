@@ -32,7 +32,15 @@
    - `docs/architecture.md`: Arsitektur internal dan diagram alur sistem.
    - `docs/cli-reference.md`: Spesifikasi lengkap antarmuka CLI.
    - `docs/packaging-and-release.md`: Panduan packaging dan tahapan rilis.
+   - `docs/sdd-orchestration.md`: Panduan orkestrasi Subagent-Driven Development (SDD).
    - `docs/README.md`: Indeks dokumentasi.
+
+6. **Subagent-Driven Development Orchestration (`sporepo-sdd`):**
+   - Mengadaptasi metodologi SDD mandiri (*zero-dependency*) dari Superpowers.
+   - Perintah CLI bawaan: `npx sporepo sdd <init|brief|pack|parse>`.
+   - Global Skill mandiri `sporepo-sdd` di `~/.gemini/config/skills/sporepo-sdd/SKILL.md`.
+   - Template terstruktur di `templates/sdd/` (`implementer-prompt`, `task-reviewer-prompt`, `final-reviewer-prompt`, `ledger`).
+   - Test suite diperluas menjadi 35 pengujian komprehensif (100% pass).
 
 ---
 

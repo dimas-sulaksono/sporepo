@@ -4,6 +4,7 @@ import { bugCommand } from './commands/bug';
 import { auditCommand } from './commands/audit';
 import { archiveCommand } from './commands/archive';
 import { migrateCommand } from './commands/migrate';
+import { sddBriefCommand, sddInitCommand, sddPackCommand, sddParseCommand } from './commands/sdd';
 
 const VERSION = '1.1.0';
 
@@ -22,6 +23,7 @@ export function printHelp(): void {
   \x1b[32mbug\x1b[0m     <"Nama Bug">       Buat laporan investigasi bug dengan ground-truth cURL & TDD plan
   \x1b[32marchive\x1b[0m <id | -a>          Arsipkan berkas yang selesai ke docs/sporepo/archive/
   \x1b[32mmigrate\x1b[0m [target-dir]       Migrasi struktur lama (prompts/ & tests/bugs/) ke docs/sporepo/
+  \x1b[32msdd\x1b[0m     <subcommand>       Orkestrasi Subagent-Driven Development (init, brief, pack, parse)
   \x1b[32maudit\x1b[0m   [target-dir]       Audit kepatuhan repositori terhadap standar rekayasa sporepo
 
 \x1b[1mOPSI:\x1b[0m
@@ -47,7 +49,7 @@ export function printVersion(): void {
 }
 
 export function run(argv: string[] = process.argv.slice(2)): void {
-  if (argv.length === 0 || argv.includes('-h') || argv.includes('--help') || argv[0] === 'help') {
+  if (argv.length === 0 || argv[0] === '-h' || argv[0] === '--help' || argv[0] === 'help') {
     printHelp();
     return;
   }
@@ -131,6 +133,94 @@ export function run(argv: string[] = process.argv.slice(2)): void {
       case 'migrate': {
         const dirArg = restArgs.find((a) => !a.startsWith('-'));
         migrateCommand(dirArg);
+        break;
+      }
+
+      case 'sdd': {
+        const sub = restArgs[0]?.toLowerCase();
+        const subArgs = restArgs.slice(1);
+
+        if (!sub || sub === '--help' || sub === '-h' || sub === 'help') {
+          console.log(`
+\x1b[1m\x1b[36msporepo sdd\x1b[0m - Subagent-Driven Development Orchestration Helper
+
+\x1b[1mPENGGUNAAN:\x1b[0m
+  $ npx sporepo sdd init  <meta-prompt-path>
+  $ npx sporepo sdd brief <meta-prompt-path> <task-number> [--out <output>]
+  $ npx sporepo sdd pack  <base-commit> [head-commit] [--out <output>]
+  $ npx sporepo sdd parse <meta-prompt-path>
+
+\x1b[1mSUBPERINTAH:\x1b[0m
+  \x1b[32minit\x1b[0m  <file>             Inisiasi ledger pelacak SDD di .scratch/sdd/<id>/ledger.md
+  \x1b[32mbrief\x1b[0m <file> <task-num>   Ekstrak instruksi brief terisolasi untuk Implementer Subagent
+  \x1b[32mpack\x1b[0m  <base> [head]      Buat paket diff Git terstruktur untuk Task Reviewer Subagent
+  \x1b[32mparse\x1b[0m <file>             Tampilkan ringkasan tugas atomik dan batasan file
+`);
+          break;
+        }
+
+        switch (sub) {
+          case 'init': {
+            const metaPath = subArgs.find((a) => !a.startsWith('-'));
+            if (!metaPath) {
+              console.error('\x1b[31m[sporepo sdd] Error: Path berkas Meta-Prompt wajib disertakan.\x1b[0m');
+              process.exit(1);
+            }
+            sddInitCommand(metaPath);
+            break;
+          }
+          case 'brief': {
+            const outIdx = subArgs.findIndex((a) => a === '--out' || a === '-o');
+            let outPath: string | undefined;
+            let cleanArgs = subArgs;
+            if (outIdx !== -1 && subArgs[outIdx + 1]) {
+              outPath = subArgs[outIdx + 1];
+              cleanArgs = subArgs.filter((_, idx) => idx !== outIdx && idx !== outIdx + 1);
+            }
+            const nonFlagArgs = cleanArgs.filter((a) => !a.startsWith('-'));
+            const metaPath = nonFlagArgs[0];
+            const taskNum = nonFlagArgs[1];
+            if (!metaPath || !taskNum) {
+              console.error('\x1b[31m[sporepo sdd] Error: Path berkas Meta-Prompt dan nomor task wajib diisi.\x1b[0m');
+              console.error('Contoh: npx sporepo sdd brief docs/sporepo/reqs/003-nama-fitur.md 1');
+              process.exit(1);
+            }
+            sddBriefCommand(metaPath, taskNum, { out: outPath });
+            break;
+          }
+          case 'pack': {
+            const outIdx = subArgs.findIndex((a) => a === '--out' || a === '-o');
+            let outPath: string | undefined;
+            let cleanArgs = subArgs;
+            if (outIdx !== -1 && subArgs[outIdx + 1]) {
+              outPath = subArgs[outIdx + 1];
+              cleanArgs = subArgs.filter((_, idx) => idx !== outIdx && idx !== outIdx + 1);
+            }
+            const nonFlagArgs = cleanArgs.filter((a) => !a.startsWith('-'));
+            const base = nonFlagArgs[0];
+            const head = nonFlagArgs[1] || 'HEAD';
+            if (!base) {
+              console.error('\x1b[31m[sporepo sdd] Error: Base commit hash wajib disertakan.\x1b[0m');
+              console.error('Contoh: npx sporepo sdd pack <base-commit> [head-commit]');
+              process.exit(1);
+            }
+            sddPackCommand(base, head, { out: outPath });
+            break;
+          }
+          case 'parse': {
+            const metaPath = subArgs.find((a) => !a.startsWith('-'));
+            if (!metaPath) {
+              console.error('\x1b[31m[sporepo sdd] Error: Path berkas Meta-Prompt wajib disertakan.\x1b[0m');
+              process.exit(1);
+            }
+            sddParseCommand(metaPath);
+            break;
+          }
+          default: {
+            console.error(`\x1b[31m[sporepo sdd] Subperintah tidak dikenal: "${sub}"\x1b[0m`);
+            process.exit(1);
+          }
+        }
         break;
       }
 

@@ -137,6 +137,25 @@ npx sporepo audit /path/to/project
 
 ---
 
+### E. `sporepo sdd`
+Mendukung orkestrasi Subagent-Driven Development (SDD) dengan pemisahan konteks terisolasi.
+
+```bash
+# 1. Inisiasi sesi dan buat buku besar (ledger)
+npx sporepo sdd init docs/sporepo/reqs/XXX-nama-fitur.md
+
+# 2. Ekstrak brief tugas spesifik untuk Implementer Subagent
+npx sporepo sdd brief docs/sporepo/reqs/XXX-nama-fitur.md 1
+
+# 3. Paketkan diff Git commit untuk Task Reviewer Subagent
+npx sporepo sdd pack <base-commit> [head-commit]
+
+# 4. Tampilkan ringkasan tugas atomik Meta-Prompt
+npx sporepo sdd parse docs/sporepo/reqs/XXX-nama-fitur.md
+```
+
+---
+
 ## 3. Opsi Global
 
 | Opsi | Alias | Deskripsi |

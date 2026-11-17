@@ -67,7 +67,19 @@ Berkas akan terbentuk di `docs/sporepo/reqs/XXX-nama-fitur.md`.
    `[x] Status: Disetujui oleh pengguna untuk mulai koding (APPROVED)`.
 
 ### Langkah 3: Eksekusi Atomik Subagent-Driven Development (SDD)
-Setelah status `APPROVED`, pecah pekerjaan menjadi subtugas atomik dan implementasikan task-by-task.
+Setelah status `APPROVED`:
+1. Jalankan inisiasi SDD dan buat buku besar pelacak:
+   ```bash
+   npx sporepo sdd init docs/sporepo/reqs/XXX-nama-fitur.md
+   ```
+2. Eksekusi task secara atomik menggunakan protokol **`sporepo-sdd`**:
+   - Agen induk murni bertindak sebagai koordinator (*zero context pollution*).
+   - Ekstrak brief per task: `npx sporepo sdd brief <file> <task-num>`.
+   - Dispatch subagent Implementer terisolasi per task.
+   - Paketkan diff: `npx sporepo sdd pack <base> <head>`.
+   - Dispatch subagent Task Reviewer (Spec Compliance + Code Quality).
+   - Jalankan continuous execution tanpa jeda konfirmasi sepele (*Rulings, not stalls*).
+   *(Lihat panduan lengkap pada global skill `sporepo-sdd`).*
 
 ### Langkah 4: Verifikasi Terminal & Pengarsipan
 1. Jalankan test suite di terminal:
