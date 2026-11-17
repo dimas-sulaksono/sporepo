@@ -122,9 +122,9 @@ export function sddBriefCommand(
   const briefContent = generateTaskBriefContent(meta, taskNum);
 
   const defaultDir = path.join(process.cwd(), '.scratch', 'sdd', meta.id);
-  ensureDir(defaultDir);
-
   const briefPath = options.out ? path.resolve(process.cwd(), options.out) : path.join(defaultDir, `task-${taskNum}-brief.md`);
+  ensureDir(path.dirname(briefPath));
+
   const reportPath = path.join(path.dirname(briefPath), `task-${taskNum}-report.md`);
 
   fs.writeFileSync(briefPath, briefContent, 'utf-8');
