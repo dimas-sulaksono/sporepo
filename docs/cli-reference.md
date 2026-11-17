@@ -1,28 +1,20 @@
-# Panduan Referensi CLI sporepo
+# Referensi CLI sporepo
 
-Dokumen ini berisi spesifikasi lengkap antarmuka baris perintah (**Command Line Interface / CLI**) dari tool `sporepo`.
+Panduan lengkap antarmuka baris perintah (**Command Line Interface / CLI**) **sporepo v1.1.0**.
 
 ---
 
-## 1. Instalasi & Eksekusi
+## 1. Cara Eksekusi
 
-### A. Eksekusi Langsung via NPX (Tanpa Instalasi Global)
 ```bash
+# 1. Tanpa instalasi via NPX (Rekomendasi)
 npx sporepo <command> [arguments] [options]
-```
 
-### B. Instalasi Global via NPM
-```bash
+# 2. Instalasi global via NPM
 npm install -g sporepo
 sporepo <command> [arguments] [options]
-```
 
-### C. Eksekusi dari Source Code Lokal
-```bash
-git clone git+https://github.com/dimas-sulaksono/sporepo.git
-cd sporepo
-npm install
-npm run build
+# 3. Dari repositori lokal
 node bin/sporepo.js <command> [arguments] [options]
 ```
 
@@ -31,167 +23,155 @@ node bin/sporepo.js <command> [arguments] [options]
 ## 2. Perintah CLI
 
 ### A. `sporepo init`
-Menginisialisasi struktur direktori rekayasa sporepo pada repositori target.
+Menginisialisasi struktur repositori rekayasa sporepo pada direktori target.
 
 ```bash
-# Inisialisasi pada direktori aktif (current working directory)
-npx sporepo init
-
-# Inisialisasi pada direktori spesifik
-npx sporepo init /path/to/target-project
-
-# Inisialisasi paksa (menimpa README dan konfigurasi yang sudah ada)
-npx sporepo init --force
+npx sporepo init [target-dir] [-f]
 ```
+
+| Opsi | Keterangan |
+| :--- | :--- |
+| `[target-dir]` | Direktori target inisialisasi (default: direktori aktif saat ini). |
+| `-f`, `--force` | Timpa paksa berkas panduan dan `.sporepo/rule.md` jika sudah ada. |
 
 **Struktur yang Dihasilkan:**
 ```text
-target-project/
-├── prompts/
-│   ├── README.md               # Panduan siklus hidup feature request
-│   └── request/                # Folder penampung berkas XXX-nama-fitur.md
-├── tests/
-│   └── bugs/
-│       ├── README.md           # Panduan investigasi bug ground-truth
-│       └── .gitkeep (jika kosong)
+target-dir/
+├── docs/sporepo/
+│   ├── reqs/          # Folder penampung Meta-Prompt fitur (XXX-nama-fitur.md)
+│   ├── bugs/          # Folder penampung laporan temuan bug (YYYY-MM-DD-slug.md)
+│   └── archive/       # Folder penampung item terverifikasi [VERIFIED]
 └── .sporepo/
-    └── rule.md                 # Aturan baku agent AI lokal
+    └── rule.md        # Aturan kerja agen AI lokal repositori
 ```
-
-**Opsi:**
-- `-f`, `--force`: Menimpa file panduan `prompts/README.md`, `tests/bugs/README.md`, dan `.sporepo/rule.md` jika sudah ada.
-- Exit code: `0` jika berhasil, `1` jika terjadi error I/O.
 
 ---
 
 ### B. `sporepo req`
-Membuat dokumen Meta-Prompt fitur baru dengan penomoran urut otomatis 3-digit.
+Membuat berkas Meta-Prompt fitur baru dengan penomoran urut otomatis 3-digit.
 
 ```bash
-# Format dasar
-npx sporepo req "<Judul Fitur>"
-
-# Contoh nyata
-npx sporepo req "Autentikasi JWT dan Refresh Token"
-
-# Menentukan target repositori yang berbeda
-npx sporepo req "Integrasi Payment Gateway" --dir /path/to/target-project
+npx sporepo req "<Judul Fitur>" [-d <target-dir>]
 ```
 
-**Perilaku Auto-Increment:**
-1. Memindai folder `prompts/request/` pada repositori target.
-2. Mengekstrak angka prefix pada file yang ada (`001-*.md`, `002-*.md`, ...).
-3. Mengambil angka tertinggi, menambahkan 1, dan memformat dengan padding 3 digit (`001`, `002`, `010`, `100`).
-4. Jika folder kosong, penomoran dimulai dari `001`.
-5. Judul dikonversi menjadi URL-safe kebab-case slug (misal: "Payment Gateway OVO & GoPay" menjadi `001-payment-gateway-ovo-gopay.md`).
+| Opsi | Keterangan |
+| :--- | :--- |
+| `<"Judul Fitur">` | **Wajib.** Judul fitur yang akan di-slugify. |
+| `-d`, `--dir <path>` | Direktori target repositori (default: direktori aktif). |
 
-**Output yang Terbentuk:**
-- File: `prompts/request/XXX-slug-judul.md`.
-- Memuat template spesifikasi dengan batasan persona dan Reviewer Gatekeeper checklist.
+- **Output:** `docs/sporepo/reqs/XXX-slug-judul.md` (misal: `001-autentikasi-jwt.md`).
+- **Penomoran:** Memindai nomor tertinggi di `reqs/` dan `archive/` lalu menambah 1 (`001`, `002`, `010`).
 
 ---
 
 ### C. `sporepo bug`
-Membuat dokumen laporan investigasi bug dengan tanggal ISO dan slug judul.
+Membuat berkas laporan investigasi bug dengan tanggal ISO dan pencegahan tabrakan nama.
 
 ```bash
-# Format dasar
-npx sporepo bug "<Judul Temuan Bug>"
-
-# Contoh nyata
-npx sporepo bug "Login 401 Gagal pada Endpoint Checkout"
-
-# Menentukan target direktori spesifik
-npx sporepo bug "Null Pointer Exception pada Token Parser" -d /path/to/project
+npx sporepo bug "<Judul Temuan Bug>" [-d <target-dir>]
 ```
 
-**Perilaku & Pencegahan Tabrakan:**
-1. Mengambil tanggal hari ini format `YYYY-MM-DD` (waktu lokal mesin).
-2. Mengonversi judul bug menjadi kebab-case slug.
-3. Menghasilkan nama berkas: `tests/bugs/YYYY-MM-DD-slug.md`.
-4. Jika berkas dengan nama persis sama sudah ada pada hari yang sama, sistem menambahkan penomoran urut otomatis:
-   - `tests/bugs/2026-11-17-slug.md` (pertama)
-   - `tests/bugs/2026-11-17-slug-2.md` (kedua)
-   - `tests/bugs/2026-11-17-slug-3.md` (ketiga)
-5. Tidak ada risiko overwrite atau kehilangan catatan historis.
+| Opsi | Keterangan |
+| :--- | :--- |
+| `<"Judul Temuan">` | **Wajib.** Judul temuan bug yang akan di-slugify. |
+| `-d`, `--dir <path>` | Direktori target repositori (default: direktori aktif). |
+
+- **Output:** `docs/sporepo/bugs/YYYY-MM-DD-slug.md` (misal: `2026-11-17-login-401.md`).
+- **Anti-Collision:** Menambahkan suffix counter otomatis jika nama bentrok (`-2.md`, `-3.md`).
 
 ---
 
-### D. `sporepo audit`
-Memindai status kepatuhan rekayasa perangkat lunak pada repositori target.
+### D. `sporepo check` (alias: `gatekeeper`)
+Audit kematangan spesifikasi Meta-Prompt, deteksi celah logika, dan validasi barrier *User Sign-Off*.
 
 ```bash
-# Audit pada repositori aktif
-npx sporepo audit
-
-# Audit pada repositori target lain
-npx sporepo audit /path/to/project
+npx sporepo check [file] [--all] [--json]
 ```
 
-**Kriteria Penilaian Skor Kepatuhan (0 - 100):**
-- `+20 poin`: Direktori `prompts/request/` ditemukan.
-- `+20 poin`: Direktori `tests/bugs/` ditemukan.
-- `+20 poin`: Berkas aturan `.sporepo/rule.md` atau `.gemini/rules/sporepo.md` ditemukan.
-- `+20 poin`: Seluruh fitur di `prompts/request/` telah disetujui (`APPROVED`) atau diverifikasi (`VERIFIED`).
-- `+20 poin`: Seluruh laporan bug di `tests/bugs/` telah dilengkapi perintah cURL riil (Ground-Truth).
+| Opsi | Keterangan |
+| :--- | :--- |
+| `[file]` | Path berkas Meta-Prompt spesifik (default: otomatis mencari `REVIEW_PENDING` terbaru). |
+| `--all` | Pindai seluruh berkas Meta-Prompt aktif di dalam direktori `docs/sporepo/reqs/`. |
+| `--json` | Cetak hasil evaluasi dan rekomendasi dalam format JSON (cocok untuk integrasi CI). |
+
+- **Exit Code:** `0` jika spesifikasi matang (skor >= 95) dan disetujui (`APPROVED`), `1` jika belum disetujui atau memiliki celah kritis.
 
 ---
 
-### E. `sporepo check` (alias: `sporepo gatekeeper`)
-Melakukan audit struktural, validasi barrier persetujuan pengguna (*User Sign-Off*), dan evaluasi kelengkapan Meta-Prompt.
+### E. `sporepo sdd`
+Orkestrasi Subagent-Driven Development (SDD) dengan ledger pelacak commit dan brief terisolasi.
 
 ```bash
-# 1. Audit berkas spesifikasi spesifik
-npx sporepo check docs/sporepo/reqs/005-nama-fitur.md
-
-# 2. Menggunakan nama perintah lengkap
-npx sporepo gatekeeper docs/sporepo/reqs/005-nama-fitur.md
-
-# 3. Otomatis mencari berkas REVIEW_PENDING terbaru
-npx sporepo check
-
-# 4. Audit seluruh berkas Meta-Prompt aktif di repositori
-npx sporepo check --all
-
-# 5. Format output JSON untuk integrasi CI
-npx sporepo check --json docs/sporepo/reqs/005-nama-fitur.md
+npx sporepo sdd <subcommand> [arguments]
 ```
 
-**Kriteria Evaluasi & Skor Kematangan (0 - 100):**
-- Header & ID 3-digit: 10 poin
-- Section 1 (Goal & Problem Statement): 15 poin
-- Section 2 (Multi-Persona Assignment): 15 poin
-- Section 3 (Touch Boundaries & Deliverables): 15 poin
-- Section 4 (Gatekeeper Barrier & Sign-Off): 20 poin
-- Section 5 (Atomic SDD Tasks): 15 poin
-- Section 6 (Terminal Verification Protocol): 10 poin
-
----
-
-### F. `sporepo sdd`
-Mendukung orkestrasi Subagent-Driven Development (SDD) dengan pemisahan konteks terisolasi.
-
-```bash
-# 1. Inisiasi sesi dan buat buku besar (ledger)
-npx sporepo sdd init docs/sporepo/reqs/XXX-nama-fitur.md
-
-# 2. Ekstrak brief tugas spesifik untuk Implementer Subagent
-npx sporepo sdd brief docs/sporepo/reqs/XXX-nama-fitur.md 1
-
-# 3. Paketkan diff Git commit untuk Task Reviewer Subagent
-npx sporepo sdd pack <base-commit> [head-commit]
-
-# 4. Tampilkan ringkasan tugas atomik Meta-Prompt
-npx sporepo sdd parse docs/sporepo/reqs/XXX-nama-fitur.md
-```
-
----
-
-## 3. Opsi Global
-
-| Opsi | Alias | Deskripsi |
+| Sub-perintah | Sintaks | Keterangan |
 | :--- | :--- | :--- |
-| `--help` | `-h`, `help` | Menampilkan panduan bantuan CLI. |
-| `--version` | `-v`, `version` | Menampilkan nomor versi sporepo aktif. |
-| `--dir <path>` | `-d <path>` | Menentukan direktori repositori target secara eksplisit. |
-| `--force` | `-f` | Memaksa penulisan ulang berkas saat inisialisasi. |
+| `init` | `npx sporepo sdd init <file.md>` | Inisiasi sesi SDD, catat base commit, dan buat buku besar `.scratch/sdd/XXX/ledger.md`. |
+| `brief` | `npx sporepo sdd brief <file.md> <task-no>` | Ekstrak task brief terisolasi untuk implementer subagent ke `.scratch/sdd/XXX/task-N-brief.md`. |
+| `pack` | `npx sporepo sdd pack <base-sha> [head-sha]` | Susun paket diff commit dan file changed untuk reviewer subagent. |
+| `parse` | `npx sporepo sdd parse <file.md>` | Tampilkan ringkasan persona, touch boundaries, dan daftar task atomik. |
+
+---
+
+### F. `sporepo archive`
+Memindahkan dokumen fitur atau bug yang telah selesai dan bertatus `VERIFIED` ke folder arsip.
+
+```bash
+npx sporepo archive <id | -a> [-d <target-dir>]
+```
+
+| Opsi | Keterangan |
+| :--- | :--- |
+| `<id>` | ID fitur 3-digit (misal: `001`) atau nama berkas spesifik yang akan diarsipkan. |
+| `-a`, `--all-verified` | Pindai dan arsipkan seluruh dokumen di `reqs/` dan `bugs/` yang bertanda `[VERIFIED]`. |
+| `-d`, `--dir <path>` | Direktori target repositori (default: direktori aktif). |
+
+- **Output:** Berkas dipindahkan secara atomik ke `docs/sporepo/archive/` tanpa mengubah nama file.
+
+---
+
+### G. `sporepo migrate`
+Memigrasikan struktur repositori lama (`prompts/request/` dan `tests/bugs/`) ke format `docs/sporepo/`.
+
+```bash
+npx sporepo migrate [target-dir]
+```
+
+| Opsi | Keterangan |
+| :--- | :--- |
+| `[target-dir]` | Direktori target migrasi (default: direktori aktif). |
+
+- **Tindakan:** Memindahkan file fitur ke `docs/sporepo/reqs/`, file bug ke `docs/sporepo/bugs/`, dan memperbarui file konfigurasi secara aman tanpa kehilangan riwayat.
+
+---
+
+### H. `sporepo audit`
+Memindai status kesehatan rekayasa, kelengkapan struktur, dan menghitung skor kepatuhan proyek.
+
+```bash
+npx sporepo audit [target-dir]
+```
+
+| Komponen Penilaian | Poin |
+| :--- | :--- |
+| Struktur folder `docs/sporepo/` lengkap (`reqs/`, `bugs/`, `archive/`) | 20 |
+| Aturan lokal `.sporepo/rule.md` terpasang | 20 |
+| Seluruh fitur aktif berstatus valid (`APPROVED` / `IN_PROGRESS` / `VERIFIED`) | 20 |
+| Seluruh laporan bug memuat bukti cURL ground-truth | 20 |
+| Tidak ada file `VERIFIED` yang tertunda diarsip | 20 |
+| **Total Skor Kepatuhan Maksimal** | **100** |
+
+---
+
+## 3. Opsi Global & Exit Code
+
+| Opsi Global | Keterangan |
+| :--- | :--- |
+| `-h`, `--help` | Menampilkan layar bantuan CLI dan daftar perintah. |
+| `-v`, `--version` | Menampilkan versi pustaka `sporepo`. |
+
+| Exit Code | Makna |
+| :--- | :--- |
+| `0` | Perintah sukses dieksekusi / Gatekeeper audit lolos. |
+| `1` | Parameter tidak valid / Error I/O / Gatekeeper audit gagal (barrier aktif). |

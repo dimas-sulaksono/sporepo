@@ -1,14 +1,13 @@
 # Panduan Packaging, CI, & Rilis sporepo
 
-Dokumen ini menjelaskan proses pengemasan paket NPM, konfigurasi Continuous Integration (CI), pengujian otomatis, dan tahapan rilis open-source untuk **sporepo**.
+Spesifikasi pengemasan paket NPM, Continuous Integration (CI), dan prosedur rilis **sporepo v1.1.0**.
 
 ---
 
-## 1. Spesifikasi Distribusi & Packaging NPM
+## 1. Spesifikasi Distribusi NPM
 
-Untuk menjaga ukuran paket seringan mungkin dan mencegah file pengujian atau dokumentasi internal terdistribusi ke konsumen library, sporepo menggunakan kebijakan **Lean NPM Packaging Whitelist**.
+Paket menggunakan whitelist ketat pada `package.json` untuk menjamin hanya artefak runtime yang didistribusikan:
 
-### A. Whitelist Berkas (`package.json`)
 ```json
 "files": [
   "bin",
@@ -21,78 +20,44 @@ Untuk menjaga ukuran paket seringan mungkin dan mencegah file pengujian atau dok
 ]
 ```
 
-### B. Hasil Audit Isolasi Paket (`npm pack --dry-run`)
-Uji kompresi tarball memastikan isolasi ketat terhadap berkas yang tidak dibutuhkan:
-- Direktori `src/` (kode sumber mentah TS) **tidak disertakan**.
-- Direktori `tests/` dan artefak kompilasi test `dist/tests/` **tidak disertakan**.
-- Direktori `docs/` (dokumentasi internal/spesifikasi) **tidak disertakan**.
-
-**Metrik Ukuran Paket v1.0.0:**
-- Unpacked Size: `~44.8 kB`
-- Tarball Compressed Size: `~12.8 kB` (jauh di bawah batas target `25 kB`)
-- Total Berkas Terdistribusi: `21 file`
+### Isolasi Berkas (Zero Artifact Leak)
+- **Dikecualikan:** `src/` (kode sumber TypeScript mentah), `tests/` dan `dist/tests/`, `docs/`, `.github/`, dan `.scratch/`.
+- **Target Ukuran Tarball:** `< 25 kB` (aktual: `~13.4 kB` terkompresi).
+- **Runtime Dependencies:** 0 dependensi eksternal (`dependencies: {}`).
 
 ---
 
-## 2. GitHub Actions CI Matrix
+## 2. GitHub Actions CI Pipeline
 
-Sistem pengujian otomatis berjalan di GitHub Actions pada setiap event `push` ke branch `main` dan pembuatan `pull_request`.
+Setiap event `push` dan `pull_request` pada branch `main` dievaluasi melalui `.github/workflows/ci.yml`.
 
-**Lokasi Workflow:** `.github/workflows/ci.yml`
-
-### A. Matriks Lingkungan
-- **Operating System:** `ubuntu-latest`
-- **Node.js Versions:** `18.x`, `20.x`, `22.x`
-
-### B. Urutan Langkah CI (*Pipeline Steps*)
-1. **Checkout Repository:** `actions/checkout@v4`
-2. **Setup Node.js & NPM Cache:** `actions/setup-node@v4` dengan opsi `cache: 'npm'`
-3. **Instalasi Bersih (*Clean Install*):** `npm ci`
-4. **Kompilasi TypeScript:** `npm run build`
-5. **Eksekusi Test Suite:** `npm test`
-6. **Verifikasi Binary CLI:**
-   ```bash
-   node bin/sporepo.js --version
-   node bin/sporepo.js --help
-   ```
+| Parameter | Konfigurasi |
+| :--- | :--- |
+| **Runner OS** | `ubuntu-latest` |
+| **Matriks Node.js** | `18.x`, `20.x`, `22.x` |
+| **Urutan Langkah** | 1. `actions/checkout@v4`<br>2. `actions/setup-node@v4` (cache npm)<br>3. `npm ci`<br>4. `npm run build`<br>5. `npm test`<br>6. Verifikasi biner CLI: `node bin/sporepo.js --version` |
 
 ---
 
-## 3. Prosedur Rilis & Tagging Versi
+## 3. Checklist Eksekusi Rilis Produksi
 
-### A. Verifikasi Pra-Rilis Lokal
-Sebelum melakukan rilis atau pembuatan git tag baru, jalankan siklus pengujian penuh:
+Langkah konkret pra-rilis dan publikasi versi baru:
 
 ```bash
-# 1. Bersihkan build dan compile ulang
+# 1. Bersihkan build & kompilasi ulang TypeScript
 rm -rf dist/
 npm run build
 
-# 2. Jalankan seluruh test suite (unit, integration, edge-cases)
+# 2. Jalankan seluruh unit & integration tests (48 tests)
 npm test
 
-# 3. Verifikasi ukuran paket npm
+# 3. Verifikasi integritas tarball distribusi
 npm pack --dry-run
-```
 
-### B. Git Tagging & Push ke Remote
-Setiap rilis versi stabil ditandai dengan Git annotated tag:
+# 4. Buat Git tag rilis teranotasi
+git tag -a v1.1.0 -m "Release sporepo v1.1.0"
+git push origin main --tags
 
-```bash
-# Tandai tag versi
-git tag -a v1.0.0 -m "Release sporepo v1.0.0"
-
-# Push branch main beserta tags ke GitHub
-git push -u origin main --tags
-```
-
-### C. Publikasi ke NPM Registry
-*(Dijalankan oleh maintainer setelah rilis GitHub dikonfirmasi)*:
-
-```bash
-# Login ke NPM jika belum terautentikasi
-npm login
-
-# Publikasikan paket publik
+# 5. Publikasikan ke NPM Registry (hanya maintainer)
 npm publish --access public
 ```

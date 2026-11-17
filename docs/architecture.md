@@ -1,98 +1,82 @@
-# Arsitektur Teknis Framework sporepo
+# Arsitektur Teknis sporepo
 
-Dokumen ini mendokumentasikan spesifikasi arsitektur internal, prinsip desain, pembagian modul, serta integrasi sistem pada framework **sporepo v1.0.0**.
-
----
-
-## 1. Konteks & Problem Statement
-
-Pembangunan aplikasi dengan bantuan AI agent sering kali menghadapi dua masalah utama:
-1. **Kehilangan Konteks & Scope Creep:** Agent langsung menulis kode tanpa memahami batasan file ownership, dependensi, atau implikasi arsitektur.
-2. **Symptom Patching & Kurangnya Pembuktian:** Agent memperbaiki bug berdasarkan tebakan (guesswork) tanpa mencari akar masalah atau menulis automated test terlebih dahulu.
-
-**sporepo** menyelesaikan masalah tersebut dengan memadukan dua paradigma:
-- **Context-Rich Meta-Prompting:** Penugasan berbasis multi-persona (@Architect, @Backend, @Frontend, @QA) dengan batas kepemilikan file tegas dan Reviewer Gatekeeper barrier.
-- **Superpowers Discipline:** Investigasi akar masalah (The Iron Law), penulisan failing test terlebih dahulu (TDD Red-Green-Refactor), dan verifikasi terminal wajib sebelum pekerjaan dianggap selesai.
+Spesifikasi desain arsitektur internal, struktur modul, dan sistem template **sporepo v1.1.0**.
 
 ---
 
-## 2. Struktur Modul & Dependensi
+## 1. Prinsip Desain Utama
 
-Proyek ini dibangun menggunakan TypeScript dengan target runtime Node.js >= 18.0.0 tanpa runtime dependency eksternal (**Zero-Dependency Core**).
+| Prinsip | Implementasi |
+| :--- | :--- |
+| **Zero-Dependency Core** | Runtime murni menggunakan pustaka bawaan Node.js (`fs`, `path`, `child_process`, `crypto`). `dependencies` di `package.json` tetap `{}`. |
+| **Context-Rich Meta-Prompting** | Struktur spesifikasi multi-persona dengan batasan file ownership (`Touch Boundaries`) dan gerbang Reviewer Gatekeeper. |
+| **Superpowers Discipline** | Wajib TDD (Red-Green-Refactor), investigasi bug dengan ground-truth bukti cURL, dan verifikasi terminal wajib sebelum pekerjaan dianggap selesai. |
+| **Terpusat di `docs/sporepo/`** | Seluruh artefak rekayasa (`reqs/`, `bugs/`, `archive/`) terkonsentrasi di dalam `docs/sporepo/` agar root workspace tetap bersih. |
 
-### A. Dependensi Sistem
-- **Runtime:** Node.js (modul standar: `fs`, `path`, `child_process`, `crypto`).
-- **Dependencies (`package.json`):** 0 runtime dependencies (`dependencies: {}`).
-- **DevDependencies (`package.json`):** `typescript` (^5.7.2), `@types/node` (^22.10.1).
-- **Test Runner:** Node.js native test runner (`node:test`, `node:assert/strict`).
+---
 
-### B. Diagram Alur Modul
+## 2. Struktur Modul & Diagram Alur
 
-```
-[CLI Invocation: npx sporepo / node bin/sporepo.js]
-                        │
-                        ▼
-                 [bin/sporepo.js]
-       (Executable Shebang + Dist Resolver)
-                        │
-                        ▼
-                 [src/cli.ts]
-      (Argument Parser & Subcommand Router)
-       ┌───────────┬───────────┬───────────┬───────────┬───────────┬───────────┐
-       ▼           ▼           ▼           ▼           ▼           ▼           ▼
-  [init.ts]   [req.ts]    [bug.ts]   [archive.ts] [migrate.ts]  [sdd.ts]  [gatekeeper.ts]
-       │           │           │           │           │           │           │
-       │           │           │           │           │           ▼           │
-       │           │           │           │           │     [sdd-parser.ts]   │
-       │           │           │           │           │           │           │
-       └───────────┴─────┬─────┴───────────┴───────────┴───────────┴───────────┘
-                         ▼
-                 [src/utils/file.ts]
-  (Template Engine, Path Resolver, Slugifier, Safe I/O)
-                         │
-                         ▼
-                [templates/**/*.md]
-  (Meta-Prompt, Bug Report, SDD Prompts, Gatekeeper Prompts, Local Rule, Guides)
+```mermaid
+flowchart TD
+    CLI["CLI Invocation (npx sporepo / node bin/sporepo.js)"] --> BIN["bin/sporepo.js (Executable Shebang)"]
+    BIN --> ROUTER["src/cli.ts (Subcommand Router & Parser)"]
+    
+    ROUTER --> INIT["src/commands/init.ts"]
+    ROUTER --> REQ["src/commands/req.ts"]
+    ROUTER --> BUG["src/commands/bug.ts"]
+    ROUTER --> CHECK["src/commands/gatekeeper.ts"]
+    ROUTER --> SDD["src/commands/sdd.ts"]
+    ROUTER --> ARCHIVE["src/commands/archive.ts"]
+    ROUTER --> MIGRATE["src/commands/migrate.ts"]
+    ROUTER --> AUDIT["src/commands/audit.ts"]
+    
+    CHECK --> FILE_UTILS["src/utils/file.ts"]
+    SDD --> SDD_PARSER["src/utils/sdd-parser.ts"]
+    SDD_PARSER --> FILE_UTILS
+    INIT & REQ & BUG & ARCHIVE & MIGRATE & AUDIT --> FILE_UTILS
+    
+    FILE_UTILS --> TEMPLATES["templates/**/*.md"]
+    FILE_UTILS --> FS["docs/sporepo/ & .sporepo/"]
 ```
 
-### C. Deskripsi Tanggung Jawab Modul
+### Matriks Tanggung Jawab Modul
 
-| Modul | Path | Tanggung Jawab Utama |
+| Modul | Path | Tanggung Jawab |
 | :--- | :--- | :--- |
-| **Executable Entrypoint** | `bin/sporepo.js` | Entrypoint CLI berizin eksekusi (`chmod +x`), mendeteksi runtime `dist/src/cli.js` atau `dist/cli.js`, dan meneruskan `process.argv`. |
-| **Command Router** | `src/cli.ts` | Parsing argumen CLI murni tanpa library pihak ketiga, menangani flag `--help`, `--version`, `--dir`, `--force`, dan routing ke seluruh handler perintah. |
-| **Init Handler** | `src/commands/init.ts` | Menginisiasi fondasi folder `docs/sporepo/reqs/`, `docs/sporepo/bugs/`, `docs/sporepo/archive/`, menyematkan `.sporepo/rule.md`, serta README panduan. |
-| **Request Handler** | `src/commands/req.ts` | Menghitung nomor urut tertinggi, memformat sequence 3-digit (`001`, `002`), men-slugify judul, dan merender template meta-prompt di `docs/sporepo/reqs/`. |
-| **Bug Handler** | `src/commands/bug.ts` | Menentukan tanggal ISO `YYYY-MM-DD`, mencegah tabrakan nama file dengan counter otomatis (`-2.md`), dan merender template laporan bug di `docs/sporepo/bugs/`. |
-| **Archive Handler** | `src/commands/archive.ts` | Memindahkan dokumen fitur berstatus `VERIFIED` atau bug berstatus `CLOSED/VERIFIED` ke `docs/sporepo/archive/`, menjaga agar penomoran urut scanner tetap konsisten. |
-| **Migrate Handler** | `src/commands/migrate.ts` | Memindahkan struktur repositori legacy (`prompts/request/` dan `tests/bugs/`) ke struktur terpusat `docs/sporepo/` secara deterministik dan aman. |
-| **SDD Engine** | `src/commands/sdd.ts` | Engine orkestrasi Subagent-Driven Development: parsing task, inisiasi ledger status per-commit, ekstraksi brief isolasi per subtugas, dan perakitan review package. |
-| **Gatekeeper Linter** | `src/commands/gatekeeper.ts` | Linter audit celah spesifikasi adversial: validasi kelengkapan struktural, deteksi anti-pattern, audit Reviewer Gatekeeper sign-off, kalkulasi maturity score (0-100), dan auto-discovery. |
-| **SDD Parser Utility** | `src/utils/sdd-parser.ts` | Parser metadata Meta-Prompt, ekstraksi seksi Touch Boundaries, parsing daftar tugas atomik berformat markdown, dan generator isolated task brief. |
-| **File Utilities** | `src/utils/file.ts` | Helper murni untuk sanitasi slug, auto-increment numbering, penanganan template, traversal direktori aman, dan resolusi path multi-lingkungan. |
+| **Entrypoint** | `bin/sporepo.js` | Executable wrapper (`chmod 0755`), mendeteksi runtime `dist/src/cli.js`, meneruskan argumen. |
+| **Command Router** | `src/cli.ts` | Parsing argumen CLI zero-dependency, penanganan `--help`, `--version`, dan routing perintah. |
+| **Init** | `src/commands/init.ts` | Perancah `docs/sporepo/{reqs,bugs,archive}`, `.sporepo/rule.md`, dan panduan markdown. |
+| **Request** | `src/commands/req.ts` | Kalkulasi nomor urut 3-digit auto-increment, slugify judul, render template meta-prompt. |
+| **Bug** | `src/commands/bug.ts` | Format tanggal ISO `YYYY-MM-DD`, resolusi tabrakan nama (`-2.md`), render template bug report. |
+| **Gatekeeper** | `src/commands/gatekeeper.ts` | Linter audit spesifikasi 5-lensa, verifikasi barrier sign-off, kalkulasi maturity score (0-100). |
+| **SDD Engine** | `src/commands/sdd.ts` | Subagent-Driven Development: parsing task, inisiasi ledger status per-commit, ekstraksi brief, packaging diff. |
+| **Archive** | `src/commands/archive.ts` | Pemindahan item `VERIFIED` ke `docs/sporepo/archive/`, mendukung `--all-verified`. |
+| **Migrate** | `src/commands/migrate.ts` | Migrasi aman layout legacy (`prompts/request/` & `tests/bugs/`) ke `docs/sporepo/`. |
+| **Audit** | `src/commands/audit.ts` | Pemindaian kesehatan repositori, kepatuhan struktur sporepo, dan evaluasi skor (0-100). |
+| **SDD Parser** | `src/utils/sdd-parser.ts` | Parser metadata Meta-Prompt, ekstraksi Touch Boundaries, parsing task atomik, generator isolated brief. |
+| **File Utils** | `src/utils/file.ts` | Sanitasi slug, traversal direktori aman, resolusi path, dan template engine deterministik. |
 
 ---
 
-## 3. Template Engine & Standar Format
+## 3. Sistem Template & Variabel
 
-Sistem template sporepo menggunakan interpolasi variabel deterministik:
-- `templates/meta-prompt.md`: Menyediakan template spesifikasi fitur lengkap dengan 6 persona, batasan kepemilikan file, dan gerbang Reviewer Gatekeeper.
-- `templates/bug-report.md`: Menyediakan template pelaporan bug dengan metadata lingkungan, cURL ground-truth, payload JSON aktual, dan 4 fase Systematic Debugging.
-- `templates/sporepo-rule.md`: Template aturan kerja AI Agent yang disematkan ke `.sporepo/rule.md` pada repositori klien.
+Template di `templates/` menggunakan interpolasi deterministik:
+- `templates/meta-prompt.md`: Kerangka spesifikasi fitur dengan multi-persona, touch boundaries, gatekeeper barrier, dan SDD tasks.
+- `templates/bug-report.md`: Kerangka investigasi bug dengan metadata lingkungan, cURL ground-truth, dan 4 fase Systematic Debugging.
+- `templates/sporepo-rule.md`: Template aturan kerja AI Agent untuk `.sporepo/rule.md`.
 
-Variabel template yang didukung:
-- `{{ID}}`: Nomor urut 3 digit (contoh: `001`, `002`).
-- `{{TITLE}}`: Judul fitur atau deskripsi bug asli.
-- `{{DATE}}`: Tanggal pembuatan format `YYYY-MM-DD` (waktu lokal).
-- `{{SLUG}}`: String judul yang disanitasi menjadi kebab-case aman.
+| Variabel | Format / Contoh | Keterangan |
+| :--- | :--- | :--- |
+| `{{ID}}` | `001`, `002`, `010` | Nomor urut 3-digit (auto-increment dari `reqs/` + `archive/`). |
+| `{{TITLE}}` | `"Payment Gateway OVO"` | Judul asli fitur atau temuan bug. |
+| `{{DATE}}` | `YYYY-MM-DD` | Tanggal lokal pembuatan berkas. |
+| `{{SLUG}}` | `payment-gateway-ovo` | Judul yang disanitasi menjadi URL-safe kebab-case. |
 
 ---
 
 ## 4. Mekanisme Keamanan & Integritas File
 
-1. **Path Traversal Protection:**
-   Fungsi resolusi path pada `src/utils/file.ts` menggunakan `path.resolve()` terhadap root yang ditentukan sehingga mencegah injeksi path keluar direktori target secara tidak sengaja.
-2. **Collision-Safe Bug File Naming:**
-   Jika file `tests/bugs/YYYY-MM-DD-slug.md` sudah ada, sistem tidak akan menimpa file tersebut, melainkan membuat file berikutnya: `tests/bugs/YYYY-MM-DD-slug-2.md`.
-3. **Idempotent Initialization:**
-   Perintah `init` tidak akan menimpa file README atau konfigurasi yang telah dimodifikasi pengguna kecuali flag `--force` (`-f`) disertakan secara eksplisit.
+1. **Path Traversal Protection:** Resolusi direktori menggunakan `path.resolve()` yang divalidasi terhadap root workspace aktif untuk mencegah directory escape.
+2. **Collision-Safe Bug Naming:** Jika berkas `docs/sporepo/bugs/YYYY-MM-DD-slug.md` sudah ada, otomatis menambahkan counter (`-2.md`, `-3.md`) tanpa menimpa data historis.
+3. **Idempotent Scaffolding:** `sporepo init` tidak menimpa konfigurasi yang telah dimodifikasi pengguna kecuali menyertakan flag `--force` (`-f`).

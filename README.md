@@ -154,6 +154,21 @@ npx sporepo audit
 
 ---
 
+## Documentation
+
+Panduan teknis dan spesifikasi lengkap tersedia di folder [`docs/`](docs/):
+
+| Dokumen | Deskripsi Ringkas |
+| :--- | :--- |
+| **[Architecture](docs/architecture.md)** | Arsitektur teknis, desain modular, filosofi zero-dependency, dan template system. |
+| **[CLI Reference](docs/cli-reference.md)** | Spesifikasi lengkap perintah CLI, argumen, flag, JSON schema, dan exit code. |
+| **[Gatekeeper Protocol](docs/gatekeeper-protocol.md)** | Protokol audit spesifikasi 5-lensa, single-round decision gate, dan linter CLI. |
+| **[SDD Orchestration](docs/sdd-orchestration.md)** | Siklus Subagent-Driven Development: Conductor, Implementer, dan Reviewer. |
+| **[Packaging & Release](docs/packaging-and-release.md)** | Prosedur rilis NPM, CI workflow, verifikasi tarball, dan checklist produksi. |
+| **[Release Readiness Certificate](docs/release-readiness-certificate.md)** | Sertifikat audit keamanan rahasia (zero-leakage) dan pengesahan rilis publik. |
+
+---
+
 ## Global Agent Integration
 
 For workstation-wide enforcement in Google Antigravity or Gemini workspaces:
@@ -175,7 +190,7 @@ npm install
 # Compile TypeScript
 npm run build
 
-# Run native test suite (47 tests)
+# Run native test suite (48 tests)
 npm test
 ```
 
