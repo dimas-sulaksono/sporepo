@@ -137,7 +137,38 @@ npx sporepo audit /path/to/project
 
 ---
 
-### E. `sporepo sdd`
+### E. `sporepo check` (alias: `sporepo gatekeeper`)
+Melakukan audit struktural, validasi barrier persetujuan pengguna (*User Sign-Off*), dan evaluasi kelengkapan Meta-Prompt.
+
+```bash
+# 1. Audit berkas spesifikasi spesifik
+npx sporepo check docs/sporepo/reqs/005-nama-fitur.md
+
+# 2. Menggunakan nama perintah lengkap
+npx sporepo gatekeeper docs/sporepo/reqs/005-nama-fitur.md
+
+# 3. Otomatis mencari berkas REVIEW_PENDING terbaru
+npx sporepo check
+
+# 4. Audit seluruh berkas Meta-Prompt aktif di repositori
+npx sporepo check --all
+
+# 5. Format output JSON untuk integrasi CI
+npx sporepo check --json docs/sporepo/reqs/005-nama-fitur.md
+```
+
+**Kriteria Evaluasi & Skor Kematangan (0 - 100):**
+- Header & ID 3-digit: 10 poin
+- Section 1 (Goal & Problem Statement): 15 poin
+- Section 2 (Multi-Persona Assignment): 15 poin
+- Section 3 (Touch Boundaries & Deliverables): 15 poin
+- Section 4 (Gatekeeper Barrier & Sign-Off): 20 poin
+- Section 5 (Atomic SDD Tasks): 15 poin
+- Section 6 (Terminal Verification Protocol): 10 poin
+
+---
+
+### F. `sporepo sdd`
 Mendukung orkestrasi Subagent-Driven Development (SDD) dengan pemisahan konteks terisolasi.
 
 ```bash

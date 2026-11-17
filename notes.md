@@ -42,6 +42,14 @@
    - Template terstruktur di `templates/sdd/` (`implementer-prompt`, `task-reviewer-prompt`, `final-reviewer-prompt`, `ledger`).
    - Test suite diperluas menjadi 35 pengujian komprehensif (100% pass).
 
+7. **Adversarial Specification Gatekeeper (`sporepo-gatekeeper`):**
+   - Modul dan skill mandiri untuk audit celah spesifikasi adversial 5 lensa (logika bisnis, dependensi, regresi, konkurensi, dan batasan keamanan).
+   - Single-Round Simultaneous Decision Gate (larangan interupsi ping-pong, format pilihan terstruktur dengan prefix rekomendasi).
+   - Perintah CLI linter bawaan: `npx sporepo check [file]` (alias: `sporepo gatekeeper [file]`) dengan sistem scoring 100 poin dan auto-discovery.
+   - Global Skill terpasang di `~/.gemini/config/skills/sporepo-gatekeeper/SKILL.md`.
+   - Template audit di `templates/gatekeeper/spec-audit-prompt.md` dan panduan di `docs/gatekeeper-protocol.md`.
+   - Test suite bertambah menjadi 47 pengujian komprehensif (100% pass).
+
 ---
 
 ## 2. Ringkasan Perintah Penting

@@ -5,6 +5,7 @@ import { auditCommand } from './commands/audit';
 import { archiveCommand } from './commands/archive';
 import { migrateCommand } from './commands/migrate';
 import { sddBriefCommand, sddInitCommand, sddPackCommand, sddParseCommand } from './commands/sdd';
+import { gatekeeperCommand } from './commands/gatekeeper';
 
 const VERSION = '1.1.0';
 
@@ -21,13 +22,16 @@ export function printHelp(): void {
   \x1b[32minit\x1b[0m    [target-dir]       Inisialisasi struktur docs/sporepo/ (reqs, bugs, archive) & .sporepo/
   \x1b[32mreq\x1b[0m     <"Nama Fitur">     Buat Meta-Prompt fitur baru dengan auto-increment 3 digit (001, 002...)
   \x1b[32mbug\x1b[0m     <"Nama Bug">       Buat laporan investigasi bug dengan ground-truth cURL & TDD plan
+  \x1b[32mcheck\x1b[0m   [file]             Audit celah spesifikasi & barrier persetujuan Meta-Prompt (alias: gatekeeper)
+  \x1b[32msdd\x1b[0m     <subcommand>       Orkestrasi Subagent-Driven Development (init, brief, pack, parse)
   \x1b[32marchive\x1b[0m <id | -a>          Arsipkan berkas yang selesai ke docs/sporepo/archive/
   \x1b[32mmigrate\x1b[0m [target-dir]       Migrasi struktur lama (prompts/ & tests/bugs/) ke docs/sporepo/
-  \x1b[32msdd\x1b[0m     <subcommand>       Orkestrasi Subagent-Driven Development (init, brief, pack, parse)
   \x1b[32maudit\x1b[0m   [target-dir]       Audit kepatuhan repositori terhadap standar rekayasa sporepo
 
 \x1b[1mOPSI:\x1b[0m
   -a, --all-verified        Arsipkan seluruh berkas yang berstatus VERIFIED
+  --all                     Targetkan seluruh berkas Meta-Prompt aktif (untuk gatekeeper/check)
+  --json                    Keluarkan hasil dalam format JSON
   -f, --force               Timpa berkas yang sudah ada saat inisialisasi
   -d, --dir <path>          Tentukan target direktori proyek
   -v, --version             Tampilkan versi sporepo
@@ -36,6 +40,8 @@ export function printHelp(): void {
 \x1b[1mCONTOH:\x1b[0m
   $ npx sporepo init
   $ npx sporepo req "Autentikasi JWT & Refresh Token"
+  $ npx sporepo check docs/sporepo/reqs/001-autentikasi-jwt.md
+  $ npx sporepo sdd init docs/sporepo/reqs/001-autentikasi-jwt.md
   $ npx sporepo bug "Auth 401 Gagal pada Endpoint Checkout"
   $ npx sporepo archive 001
   $ npx sporepo archive --all-verified
@@ -220,6 +226,29 @@ export function run(argv: string[] = process.argv.slice(2)): void {
             console.error(`\x1b[31m[sporepo sdd] Subperintah tidak dikenal: "${sub}"\x1b[0m`);
             process.exit(1);
           }
+        }
+        break;
+      }
+
+      case 'gatekeeper':
+      case 'check': {
+        const isJson = restArgs.includes('--json');
+        const isAll = restArgs.includes('--all');
+        const quiet = restArgs.includes('--quiet') || restArgs.includes('-q');
+        const dirIdx = restArgs.findIndex((a) => a === '--dir' || a === '-d');
+        let targetDir: string | undefined;
+        let filteredArgs = restArgs.filter((a) => a !== '--json' && a !== '--all' && a !== '--quiet' && a !== '-q');
+
+        if (dirIdx !== -1 && restArgs[dirIdx + 1]) {
+          targetDir = restArgs[dirIdx + 1];
+          filteredArgs = filteredArgs.filter((_, idx) => idx !== dirIdx && idx !== dirIdx + 1);
+        }
+
+        const fileArg = filteredArgs.find((a) => !a.startsWith('-'));
+        const results = gatekeeperCommand(fileArg, { json: isJson, all: isAll, quiet, targetDir });
+        const hasCritical = results.some((r) => !r.isValid || !r.isApproved);
+        if (hasCritical && !isJson) {
+          process.exitCode = 1;
         }
         break;
       }

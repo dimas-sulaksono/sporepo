@@ -146,9 +146,10 @@ npx sporepo audit
 | `sporepo init` | `[target-dir] [-f]` | Scaffolds `docs/sporepo/` (`reqs`, `bugs`, `archive`) and `.sporepo/`. |
 | `sporepo req` | `<"Title"> [-d dir]` | Generates next 3-digit numbered Meta-Prompt in `docs/sporepo/reqs/`. |
 | `sporepo bug` | `<"Title"> [-d dir]` | Generates timestamped bug report in `docs/sporepo/bugs/`. |
+| `sporepo check` | `[file] [--all] [--json]` | Audits Meta-Prompt specification maturity & barrier sign-off (alias: `gatekeeper`). |
+| `sporepo sdd` | `<init \| brief \| pack \| parse>` | Orchestrates Subagent-Driven Development with zero context pollution. |
 | `sporepo archive` | `<id \| -a> [-d dir]` | Moves verified items to `docs/sporepo/archive/`. |
 | `sporepo migrate` | `[target-dir]` | Safely migrates legacy `prompts/` and `tests/bugs/` to `docs/sporepo/`. |
-| `sporepo sdd` | `<init \| brief \| pack \| parse>` | Orchestrates Subagent-Driven Development with zero context pollution. |
 | `sporepo audit` | `[target-dir]` | Evaluates repository sporepo compliance score, items, and pending archives. |
 
 ---
@@ -159,6 +160,7 @@ For workstation-wide enforcement in Google Antigravity or Gemini workspaces:
 
 - **Global Skills:**
   - Copy `skills/sporepo/SKILL.md` to `~/.gemini/config/skills/sporepo/SKILL.md`.
+  - Copy `skills/sporepo-gatekeeper/SKILL.md` to `~/.gemini/config/skills/sporepo-gatekeeper/SKILL.md`.
   - Copy `skills/sporepo-sdd/SKILL.md` to `~/.gemini/config/skills/sporepo-sdd/SKILL.md`.
 - **Global Rule:** Copy `rules/base-sporepo.md` to `~/.gemini/config/rules/base-sporepo.md`.
 
@@ -173,7 +175,7 @@ npm install
 # Compile TypeScript
 npm run build
 
-# Run native test suite (35 tests)
+# Run native test suite (47 tests)
 npm test
 ```
 

@@ -59,10 +59,13 @@ Berkas akan terbentuk di `docs/sporepo/reqs/XXX-nama-fitur.md`.
 > [!CAUTION]
 > AI Agent **DILARANG KERAS** menulis atau menyentuh kode implementasi sebelum fase audit ini selesai dan disetujui pengguna!
 
-1. Periksa kelengkapan **Matriks Persona** (`@Architect`, `@Backend`, `@Frontend`, `@Database`, `@Security`, `@QA`).
-2. Tentukan **Batas Kepemilikan File** (*Touch Boundaries*) yang boleh dan dilarang disentuh.
-3. Lakukan audit kritis terhadap celah logika, dependensi tersembunyi, risiko breaking changes, dan edge cases.
-4. Jika ada keputusan arsitektural yang ambigu, ajukan pertanyaan pilihan/keputusan secara **simultan dalam maksimal 1 putaran** kepada pengguna.
+1. Jalankan linter audit spesifikasi:
+   ```bash
+   npx sporepo check docs/sporepo/reqs/XXX-nama-fitur.md
+   ```
+2. Bedah spesifikasi menggunakan protokol adversial **`sporepo-gatekeeper`** (5 lensa audit: logika bisnis, dependensi, regresi, edge-cases, dan security boundaries).
+3. Periksa kelengkapan **Matriks Persona** (`@Architect`, `@Backend`, `@Frontend`, `@Database`, `@Security`, `@QA`) dan **Batas Kepemilikan File** (*Touch Boundaries*).
+4. Jika ada keputusan arsitektural yang ambigu, ajukan pertanyaan pilihan/keputusan secara **simultan dalam maksimal 1 putaran** kepada pengguna (dengan opsi rekomendasi).
 5. **TUNGGU konfirmasi persetujuan pengguna** hingga status dicentang:
    `[x] Status: Disetujui oleh pengguna untuk mulai koding (APPROVED)`.
 
