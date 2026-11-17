@@ -207,6 +207,36 @@ describe('sporepo - Unit & Integration Test Suite', () => {
       assert.equal(req2.id, '002');
     });
 
+    it('should archive all verified items with --all-verified without false-positives', () => {
+      const targetDir = path.join(TEST_SANDBOX_DIR, 'archive-all-verified-target');
+      initCommand(targetDir, { quiet: true });
+
+      // Create verified request with bold status and backticks
+      const reqVerified = reqCommand('Verified Feature', { targetDir, quiet: true });
+      let verifiedContent = fs.readFileSync(reqVerified.filePath, 'utf-8');
+      verifiedContent = verifiedContent.replace(
+        /> \*\*Status:\*\* `DRAFT`[^\n]*/,
+        '> **Status:** `VERIFIED` <!-- Options: DRAFT | REVIEW_PENDING | APPROVED | IN_PROGRESS | VERIFIED -->'
+      );
+      fs.writeFileSync(reqVerified.filePath, verifiedContent, 'utf-8');
+
+      // Create draft request that mentions VERIFIED in body text (adversarial check)
+      const reqDraft = reqCommand('Draft Feature With Mention', { targetDir, quiet: true });
+      let draftContent = fs.readFileSync(reqDraft.filePath, 'utf-8');
+      draftContent += '\n\nCatatan: Jangan ubah status menjadi VERIFIED sebelum pengujian selesai.\n';
+      fs.writeFileSync(reqDraft.filePath, draftContent, 'utf-8');
+
+      // Execute archive with --all-verified
+      const archRes = archiveCommand('--all-verified', { targetDir, quiet: true });
+      assert.equal(archRes.archivedFiles.length, 1);
+      assert.equal(archRes.archivedFiles[0].type, 'req');
+      assert.ok(fs.existsSync(path.join(targetDir, 'docs', 'sporepo', 'archive', 'reqs', '001-verified-feature.md')));
+      assert.ok(!fs.existsSync(reqVerified.filePath));
+
+      // Draft request MUST remain active in reqs
+      assert.ok(fs.existsSync(reqDraft.filePath));
+    });
+
     it('should migrate legacy prompts/ and tests/bugs/ to docs/sporepo/', () => {
       const targetDir = path.join(TEST_SANDBOX_DIR, 'legacy-migrate-target');
       const legacyReqDir = path.join(targetDir, 'prompts', 'request');

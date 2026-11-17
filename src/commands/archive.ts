@@ -13,6 +13,27 @@ export interface ArchiveResult {
   targetDir: string;
 }
 
+/**
+ * Checks if a document has VERIFIED status based on its header metadata block.
+ * Protects against false positives from body text mentioning "VERIFIED".
+ */
+export function isDocumentVerified(content: string): boolean {
+  // 1. Prioritize official header metadata: > **Status:** `VERIFIED`
+  const headerMatch = content.match(/^>\s*\*\*Status:\*\*\s*`?([A-Za-z_]+)`?/m);
+  if (headerMatch) {
+    return headerMatch[1].toUpperCase() === 'VERIFIED';
+  }
+
+  // 2. Fallback for alternative formatting in header area (first 30 lines)
+  const headerLines = content.split('\n').slice(0, 30).join('\n');
+  const fallbackMatch = headerLines.match(/(?:\*\*Status:\*\*|status:)\s*`?([A-Za-z_]+)`?/i);
+  if (fallbackMatch) {
+    return fallbackMatch[1].toUpperCase() === 'VERIFIED';
+  }
+
+  return headerLines.includes('[VERIFIED]');
+}
+
 export function archiveCommand(identifierOrFlag?: string, options: ArchiveOptions = {}): ArchiveResult {
   const paths = getSporepoPaths(options.targetDir);
   const { targetDir, reqsDir, bugsDir, archiveReqsDir, archiveBugsDir } = paths;
@@ -34,7 +55,7 @@ export function archiveCommand(identifierOrFlag?: string, options: ArchiveOption
     let content = fs.readFileSync(sourcePath, 'utf-8');
     const today = formatDate();
     if (!content.includes('**Archived At:**')) {
-      content = content.replace(/(> \*\*Status:\*\* [^\n]+)/, `$1\n> **Archived At:** ${today}`);
+      content = content.replace(/(> \*\*Status:\*\*[^\n]+)/i, `$1\n> **Archived At:** ${today}`);
     }
 
     fs.writeFileSync(destPath, content, 'utf-8');
@@ -48,25 +69,25 @@ export function archiveCommand(identifierOrFlag?: string, options: ArchiveOption
   };
 
   if (isAllVerified) {
-    // 1. Scan reqs for VERIFIED
+    // 1. Scan reqs for VERIFIED with deterministic sorting
     if (fs.existsSync(reqsDir)) {
-      const files = fs.readdirSync(reqsDir).filter((f) => f.endsWith('.md'));
+      const files = fs.readdirSync(reqsDir).filter((f) => f.endsWith('.md')).sort();
       for (const f of files) {
         const fullPath = path.join(reqsDir, f);
         const content = fs.readFileSync(fullPath, 'utf-8');
-        if (/status:\s*`?VERIFIED`?/i.test(content) || content.includes('[VERIFIED]')) {
+        if (isDocumentVerified(content)) {
           archiveFile(fullPath, archiveReqsDir, 'req');
         }
       }
     }
 
-    // 2. Scan bugs for VERIFIED
+    // 2. Scan bugs for VERIFIED with deterministic sorting
     if (fs.existsSync(bugsDir)) {
-      const files = fs.readdirSync(bugsDir).filter((f) => f.endsWith('.md') && f !== 'README.md');
+      const files = fs.readdirSync(bugsDir).filter((f) => f.endsWith('.md') && f !== 'README.md').sort();
       for (const f of files) {
         const fullPath = path.join(bugsDir, f);
         const content = fs.readFileSync(fullPath, 'utf-8');
-        if (/status:\s*`?VERIFIED`?/i.test(content) || content.includes('[VERIFIED]')) {
+        if (isDocumentVerified(content)) {
           archiveFile(fullPath, archiveBugsDir, 'bug');
         }
       }

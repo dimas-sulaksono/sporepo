@@ -3,6 +3,7 @@
 > **Request ID:** 003  
 > **Date:** 2026-11-17  
 > **Status:** `VERIFIED` <!-- Options: DRAFT | REVIEW_PENDING | APPROVED | IN_PROGRESS | VERIFIED -->  
+> **Archived At:** 2026-11-17
 > **Branch / Target:** `feat/sporepo-sdd`  
 > **Target Scope:** Framework Orkestrasi Subagent Mandiri (`sporepo-sdd`), CLI Helper, dan Template Dispatch  
 

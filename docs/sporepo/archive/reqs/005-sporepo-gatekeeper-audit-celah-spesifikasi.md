@@ -3,6 +3,7 @@
 > **Request ID:** 005  
 > **Date:** 2026-11-17  
 > **Status:** `VERIFIED` <!-- Options: DRAFT | REVIEW_PENDING | APPROVED | IN_PROGRESS | VERIFIED -->  
+> **Archived At:** 2026-11-17
 > **Branch / Target:** `feat/sporepo-gatekeeper`  
 > **Target Scope:** Global Skill `sporepo-gatekeeper`, CLI Linter `sporepo gatekeeper`, dan Template Audit Adversial  
 

@@ -2,6 +2,7 @@
 
 > **Target Repositori:** `sporepo`  
 > **Status:** `VERIFIED` <!-- Options: DRAFT | REVIEW_PENDING | APPROVED | IN_PROGRESS | VERIFIED -->  
+> **Archived At:** 2026-11-17
 > **Target Environment:** `Production / Public Open-Source (GitHub & NPM Registry)`  
 > **Tingkat Kritis:** `CRITICAL (Security & Secret Zero-Tolerance Gate)`  
 

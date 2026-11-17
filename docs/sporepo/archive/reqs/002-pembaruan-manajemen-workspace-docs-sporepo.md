@@ -3,6 +3,7 @@
 > **Request ID:** 002  
 > **Date:** 2026-11-17  
 > **Status:** `VERIFIED` <!-- Selesai & Terverifikasi Terminal -->  
+> **Archived At:** 2026-11-17
 > **Branch / Target:** `main`  
 > **Target Scope:** CLI sporepo, Template Scaffolding, & Workspace Directory Management  
 
