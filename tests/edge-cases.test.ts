@@ -150,14 +150,18 @@ describe('SPOREPO - Advanced QA & Security Edge-Cases', () => {
     });
 
     it('should execute binary CLI and exit cleanly with proper status codes', () => {
+      const pkgPath = path.join(ROOT_DIR, 'package.json');
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+      const expectedVersion = `sporepo v${pkg.version}`;
+
       // Missing command -> prints help, exit 0
       const rawHelp = execFileSync(process.execPath, [binScript], { encoding: 'utf-8' });
       const cleanHelp = rawHelp.replace(/\x1b\[[0-9;]*m/g, '');
-      assert.ok(cleanHelp.includes('sporepo v1.1.0'));
+      assert.ok(cleanHelp.includes(expectedVersion));
 
       // Version flag -> exit 0
       const verOut = execFileSync(process.execPath, [binScript, '-v'], { encoding: 'utf-8' });
-      assert.equal(verOut.trim(), 'sporepo v1.1.0');
+      assert.equal(verOut.trim(), expectedVersion);
 
       // Invalid command -> exit 1
       assert.throws(() => {

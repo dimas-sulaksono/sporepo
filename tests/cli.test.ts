@@ -259,9 +259,10 @@ describe('sporepo - Unit & Integration Test Suite', () => {
     const binScript = path.join(ROOT_DIR, 'bin', 'sporepo.js');
 
     it('should execute bin/sporepo.js --help and exit with 0', () => {
+      const pkg = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'package.json'), 'utf-8'));
       const rawOut = execFileSync(process.execPath, [binScript, '--help'], { encoding: 'utf-8' });
       const out = rawOut.replace(/\x1b\[[0-9;]*m/g, '');
-      assert.ok(out.includes('sporepo v1.1.0'));
+      assert.ok(out.includes(`sporepo v${pkg.version}`));
       assert.ok(out.includes('init    [target-dir]'));
       assert.ok(out.includes('req     <"Nama Fitur">'));
       assert.ok(out.includes('bug     <"Nama Bug">'));

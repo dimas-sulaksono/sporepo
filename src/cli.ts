@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { initCommand } from './commands/init';
 import { reqCommand } from './commands/req';
 import { bugCommand } from './commands/bug';
@@ -7,7 +9,20 @@ import { migrateCommand } from './commands/migrate';
 import { sddBriefCommand, sddInitCommand, sddPackCommand, sddParseCommand } from './commands/sdd';
 import { gatekeeperCommand } from './commands/gatekeeper';
 
-const VERSION = '1.1.0';
+function getVersion(): string {
+  try {
+    const pkgPath = path.resolve(__dirname, '../../package.json');
+    if (fs.existsSync(pkgPath)) {
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+      if (pkg.version) return pkg.version;
+    }
+  } catch {
+    // Fallback if filesystem read fails
+  }
+  return '1.1.1';
+}
+
+const VERSION = getVersion();
 
 export function printHelp(): void {
   console.log(`
