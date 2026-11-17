@@ -6,6 +6,15 @@
   "bin": {
     "sporepo": "./bin/sporepo.js"
   },
+  "files": [
+    "bin",
+    "dist/src",
+    "templates",
+    "skills",
+    "rules",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
