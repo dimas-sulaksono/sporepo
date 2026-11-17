@@ -3,6 +3,7 @@
 > **AI-Assisted Software Engineering Framework & Zero-Dependency Scaffolding CLI**  
 > *A robust hybrid combining context-rich meta-prompting with disciplined engineering workflows.*
 
+[![CI](https://github.com/dimas-sulaksono/sporepo/actions/workflows/ci.yml/badge.svg)](https://github.com/dimas-sulaksono/sporepo/actions/workflows/ci.yml)
 [![Node.js CI](https://img.shields.io/badge/Node.js-18%2B-brightgreen.svg)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Dependencies: 0](https://img.shields.io/badge/dependencies-0-blue.svg)](#zero-dependency)
@@ -143,6 +144,12 @@ npm run build
 # Run native test suite
 npm test
 ```
+
+---
+
+## Contributing
+
+We welcome community contributions! Please review our [Contributing Guide](CONTRIBUTING.md) to learn about our engineering principles, development setup, and PR lifecycle.
 
 ---
 

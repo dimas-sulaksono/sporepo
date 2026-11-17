@@ -1,0 +1,58 @@
+name: Feature Proposal (SPOREPO Meta-Prompt)
+description: Suggest an idea or new capability adhering to the SPOREPO multi-persona engineering framework.
+title: "[FEAT]: "
+labels: ["enhancement", "sporepo-feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### SPOREPO Feature Request Lifecycle
+        This form scaffolds a feature proposal aligned with SPOREPO's **Reviewer Gatekeeper Barrier** protocol.
+
+  - type: textarea
+    id: problem-and-goal
+    attributes:
+      label: 1. Business Context & Goal
+      description: Explain the background, the exact problem to solve, and the success criteria.
+      placeholder: "Problem: Currently users cannot ...\nGoal: Provide a capability to ...\nSuccess Metric: ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: persona-responsibilities
+    attributes:
+      label: 2. Multi-Persona Breakdown
+      description: Define clear roles and responsibilities across engineering disciplines.
+      value: |
+        - **@Architect:** Architecture design & data contracts
+        - **@Backend:** API, services, business logic
+        - **@Frontend:** UI components & state handling
+        - **@QA:** Automated test suite & edge-cases verification
+    validations:
+      required: true
+
+  - type: textarea
+    id: touch-boundaries
+    attributes:
+      label: 3. File Ownership & Touch Boundaries
+      description: Specify files that may be modified and files strictly restricted from changes.
+      placeholder: "- Allowed files: src/..., templates/...\n- Restricted files: package.json dependencies (zero-dependency rule)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: reviewer-audit
+    attributes:
+      label: 4. Reviewer Gatekeeper Audit & Edge Cases
+      description: Identify potential edge cases, breaking changes, or ambiguities before implementation.
+      placeholder: "- Edge Case 1: What happens if network disconnects?\n- Breaking Changes: None\n- User Sign-Off needed for: ..."
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: gatekeeper-signoff
+    attributes:
+      label: 5. Reviewer Gatekeeper Sign-Off
+      options:
+        - label: I confirm that the specification has been audited and is ready for implementation review.
+          required: true

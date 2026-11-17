@@ -1,0 +1,68 @@
+name: Bug Report (Ground-Truth Evidence)
+description: Report a defect with deterministic reproduction evidence adhering to The Iron Law of Debugging.
+title: "[BUG]: "
+labels: ["bug", "sporepo-bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### The Iron Law of Debugging
+        > **"NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST"**  
+        Please provide deterministic evidence (cURL / exact CLI command and raw error payload).
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 1. Environment & Client Metadata
+      description: OS version, Node.js version, sporepo version, device/browser.
+      value: |
+        - **OS:** macOS / Linux / Windows
+        - **Node.js Version:** v...
+        - **sporepo Version:** v1.0.0
+    validations:
+      required: true
+
+  - type: textarea
+    id: ground-truth-curl
+    attributes:
+      label: 2. Ground-Truth Reproduction Command (cURL / CLI)
+      description: Provide the exact CLI command or cURL request reproducing the failure deterministically.
+      placeholder: |
+        ```bash
+        node bin/sporepo.js req "..."
+        # or
+        curl -i -X POST 'https://...'
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-error-payload
+    attributes:
+      label: 3. Actual Error Payload / Terminal Output
+      description: Paste the exact error output, stack trace, or HTTP response received.
+      placeholder: |
+        ```text
+        Error: Cannot find module '...'
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: 4. Expected Behavior
+      description: Explain what should have occurred instead.
+      placeholder: "The command should have exited with code 0 and created ..."
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: iron-law-checklist
+    attributes:
+      label: 5. Systematic Debugging Protocol
+      options:
+        - label: I have verified this bug is reproducible with the command provided above.
+          required: true
+        - label: I understand that any fix will require a failing automated regression test (TDD RED) before acceptance.
+          required: true
