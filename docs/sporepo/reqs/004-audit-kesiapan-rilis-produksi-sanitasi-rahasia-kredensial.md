@@ -1,6 +1,6 @@
 # META-PROMPT: [004] Audit Kesiapan Rilis Produksi & Sanitasi Rahasia / Kredensial
 
-> **Target Repositori:** `/Users/sulaksono/work/projects/tools/sporepo`  
+> **Target Repositori:** `sporepo`  
 > **Status:** `VERIFIED` <!-- Options: DRAFT | REVIEW_PENDING | APPROVED | IN_PROGRESS | VERIFIED -->  
 > **Target Environment:** `Production / Public Open-Source (GitHub & NPM Registry)`  
 > **Tingkat Kritis:** `CRITICAL (Security & Secret Zero-Tolerance Gate)`  
@@ -45,7 +45,7 @@ Repositori `sporepo` telah menyelesaikan implementasi fitur v1.1.0 dan bersiap u
 - **Standar Sanitasi Rahasia (*Sanitization Rules*):**
   - DILARANG menggunakan token/kredensial asli dalam file apa pun. Semua contoh cURL atau panduan wajib menggunakan placeholder standar (`YOUR_TOKEN_HERE`, `api.example.com`, placeholder dummy).
   - Folder `docs/prompt/` yang memuat prompt perancangan internal harus dipastikan 100% terisolasi atau di-ignore dengan benar.
-  - Tidak boleh ada path absolut lokal mesin pengembang (misal: `/Users/sulaksono/...`) yang bocor ke dalam paket distribusi NPM (kecuali di README/dokumentasi lokal internal jika relevan).
+  - Tidak boleh ada path absolut lokal mesin pengembang (misal: `/Users/username/...`) yang bocor ke dalam paket distribusi NPM (kecuali di README/dokumentasi lokal internal jika relevan).
 
 ---
 

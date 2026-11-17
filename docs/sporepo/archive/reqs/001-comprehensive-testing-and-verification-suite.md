@@ -87,7 +87,7 @@ node bin/sporepo.js audit
 ℹ tests 23 | suites 11 | pass 23 | fail 0 | cancelled 0 | skipped 0
 
 $ npm list --omit=dev
-sporepo@1.0.0 /Users/sulaksono/work/projects/tools/sporepo
+sporepo@1.0.0
 └── (empty)
 
 $ node bin/sporepo.js audit
