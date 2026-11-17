@@ -4,11 +4,11 @@
   "description": "Zero-dependency CLI & engineering framework for AI-assisted software development (Meta-Prompting + Superpowers Discipline)",
   "main": "dist/src/cli.js",
   "bin": {
-    "sporepo": "./bin/sporepo.js"
+    "sporepo": "bin/sporepo.js"
   },
   "files": [
     "bin",
-    "dist",
+    "dist/src",
     "templates",
     "rules",
     "skills",
@@ -38,7 +38,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dimas-sulaksono/sporepo.git"
+    "url": "git+https://github.com/dimas-sulaksono/sporepo.git"
   },
   "engines": {
     "node": ">=18.0.0"
